@@ -181,6 +181,20 @@ function updateScoreUI(prevStreak = streak) {
     }
 }
 
+function showMissNotification(role, missedTime) {
+    const card = document.createElement('div');
+    card.className = 'miss-toast';
+    card.innerHTML = `
+        <div class="miss-toast-icon">✕</div>
+        <div class="miss-toast-body">
+            <div class="miss-toast-title">MISSED ${role.toUpperCase()}</div>
+            <div class="miss-toast-sub">was up at <b>${missedTime}</b> — streak broken</div>
+        </div>`;
+    document.body.appendChild(card);
+    setTimeout(() => card.classList.add('leaving'), 1800);
+    setTimeout(() => card.remove(), 2200);
+}
+
 function pulseScore() {
     scoreVal.classList.remove('score-pulse');
     void scoreVal.offsetWidth;
@@ -192,11 +206,13 @@ function renderFlashTracker() {
     const active = Object.entries(expectedFlashes).filter(([, f]) => f.active);
     if (active.length === 0) { flashTracker.innerHTML = ''; return; }
 
+    const windowMs = getCatchWindowMs();
+    const now = Date.now();
     flashTracker.innerHTML = active.map(([role, f]) => {
-        const deadline = f.flashTime + 60;
-        const remaining = Math.max(0, deadline - gameTimeSeconds);
-        const pct = Math.max(0, Math.min(100, (remaining / 60) * 100));
-        const urgent = remaining <= 15 ? ' urgent' : '';
+        const remainingMs = Math.max(0, windowMs - (now - f.realTimeSpawn));
+        const remaining = Math.ceil(remainingMs / 1000);
+        const pct = Math.max(0, Math.min(100, (remainingMs / windowMs) * 100));
+        const urgent = remainingMs <= windowMs * 0.33 ? ' urgent' : '';
         return `
             <div class="flash-card${urgent}">
                 <div class="flash-card-head">
@@ -209,20 +225,28 @@ function renderFlashTracker() {
 }
 
 // Update clock
+function getCatchWindowMs() {
+    // Difficulty = flash frequency: high freq → hardest → shortest window
+    const f = flashFreqSelect.value;
+    if (f === 'high')   return 5000;
+    if (f === 'low')    return 15000;
+    return 10000; // medium
+}
+
 function updateClock() {
     gameTimeSeconds += 1;
     gameClockEl.textContent = formatTime(gameTimeSeconds);
 
+    const windowMs = getCatchWindowMs();
+    const now = Date.now();
     for (const role in expectedFlashes) {
-        if (expectedFlashes[role].active) {
-            if (gameTimeSeconds > expectedFlashes[role].flashTime + 60) {
-                expectedFlashes[role].active = false;
-                const prevStreak = streak;
-                streak = 0;
-                const missedTime = formatTime(expectedFlashes[role].time);
-                showFloatingText(`Missed ${role.toUpperCase()}! Was ${missedTime}`, '#ff4444');
-                updateScoreUI(prevStreak);
-            }
+        const f = expectedFlashes[role];
+        if (f.active && now - f.realTimeSpawn > windowMs) {
+            f.active = false;
+            const prevStreak = streak;
+            streak = 0;
+            showMissNotification(role, formatTime(f.time));
+            updateScoreUI(prevStreak);
         }
     }
     renderFlashTracker();
@@ -271,7 +295,8 @@ function triggerRandomFlash(manualRole = null) {
             expectedFlashes[extraRoleLower] = {
                 active: true,
                 flashTime: timeFlashedSeconds,
-                time: expectedTimeSeconds
+                time: expectedTimeSeconds,
+                realTimeSpawn: Date.now()
             };
             // Small delay for UI purposes
             setTimeout(() => {
@@ -394,7 +419,8 @@ function startPractice() {
     gameClockEl.textContent = formatTime(gameTimeSeconds);
     chatHistory.innerHTML = '';
     
-    clockInterval = setInterval(updateClock, 1000);
+    const speed = parseFloat(clockSpeedSelect.value) || 1;
+    clockInterval = setInterval(updateClock, Math.max(50, Math.round(1000 / speed)));
     
     // First flash starts soon
     scenarioTimeout = setTimeout(() => triggerRandomFlash(), 3000);

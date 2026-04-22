@@ -14,42 +14,21 @@ body, html {
     position: relative;
     user-select: none;
     overflow: hidden;
-    background-color: #0a1016;
+    background-color: #060b14;
     background-image:
-        radial-gradient(ellipse at 50% 0%, rgba(200,170,110,0.08), transparent 55%),
-        radial-gradient(ellipse at 50% 100%, rgba(91,192,235,0.06), transparent 55%),
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='96' viewBox='0 0 56 96'><g fill='none' stroke='%23c8aa6e' stroke-opacity='0.08' stroke-width='1'><polygon points='28,2 54,16 54,48 28,62 2,48 2,16'/><polygon points='28,50 54,64 54,96 28,110 2,96 2,64'/></g></svg>"),
-        radial-gradient(ellipse at center, #1a2a3a 0%, #0a1016 70%, #05080c 100%);
-    background-repeat: no-repeat, no-repeat, repeat, no-repeat;
-    background-size: auto, auto, 56px 96px, auto;
+        /* aurora blobs — modern mesh-gradient feel */
+        radial-gradient(60vmin 40vmin at 15% 20%, rgba(10, 200, 185, 0.18), transparent 70%),
+        radial-gradient(55vmin 45vmin at 85% 10%, rgba(200, 170, 110, 0.14), transparent 70%),
+        radial-gradient(70vmin 50vmin at 75% 95%, rgba(91, 140, 235, 0.16), transparent 70%),
+        radial-gradient(50vmin 40vmin at 10% 90%, rgba(181, 139, 245, 0.10), transparent 70%),
+        /* base */
+        linear-gradient(180deg, #0b1522 0%, #060b14 60%, #03060b 100%);
 }
-
-/* Gold corner brackets — frame the viewport like a client panel */
-.game-container::before,
-.game-container::after {
-    content: "";
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    pointer-events: none;
-    z-index: 1;
-    border-color: #c8aa6e;
-    border-style: solid;
-    opacity: 0.7;
-}
-.game-container::before {
-    top: 12px; left: 12px;
-    border-width: 2px 0 0 2px;
-}
-.game-container::after {
-    bottom: 12px; right: 12px;
-    border-width: 0 2px 2px 0;
-}
-/* Soft vignette */
+/* Soft vignette on top for focus */
 .game-container > .vignette {
     position: absolute; inset: 0;
     pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
     z-index: 1;
 }
 
@@ -543,6 +522,65 @@ body, html {
     padding: 24px 0;
     display: none;
 }
+
+/* Miss toast — themed notification for dropped flashes */
+.miss-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px 10px 14px;
+    background: linear-gradient(90deg, rgba(60,12,18,0.95), rgba(20,10,14,0.95));
+    border: 1px solid #ff4f6d;
+    border-left: 4px solid #ff4f6d;
+    border-radius: 4px;
+    box-shadow: 0 8px 28px rgba(255,79,109,0.35), 0 2px 6px rgba(0,0,0,0.6), inset 0 0 18px rgba(255,79,109,0.08);
+    color: #ffd7de;
+    font-family: Arial, sans-serif;
+    z-index: 1500;
+    pointer-events: none;
+    opacity: 0;
+    animation: missIn 0.28s ease-out forwards;
+}
+.miss-toast.leaving {
+    animation: missOut 0.35s ease-in forwards;
+}
+@keyframes missIn {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.96); }
+    60%  { transform: translateX(-50%) translateY(2px)   scale(1.02); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
+}
+@keyframes missOut {
+    to { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.98); }
+}
+.miss-toast-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,79,109,0.15);
+    border: 1.5px solid #ff4f6d;
+    color: #ff4f6d;
+    font-weight: 900;
+    font-size: 16px;
+    text-shadow: 0 0 8px rgba(255,79,109,0.6);
+}
+.miss-toast-title {
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    font-size: 13px;
+    color: #ff8698;
+    text-shadow: 0 0 10px rgba(255,79,109,0.4);
+}
+.miss-toast-sub {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: #e3b3bb;
+    opacity: 0.85;
+}
+.miss-toast-sub b { color: #fff0c8; }
 
 /* Floating Gamification Text */
 .floating-text {
