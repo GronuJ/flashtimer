@@ -120,6 +120,18 @@ function getRank(s) {
     return r;
 }
 
+// LoL-flavored announcer callouts, scaled to current streak.
+function getCatchCallout(s) {
+    if (s >= 25) return 'LEGENDARY';
+    if (s >= 17) return 'GODLIKE';
+    if (s >= 12) return 'UNSTOPPABLE';
+    if (s >= 8)  return 'DOMINATING';
+    if (s >= 5)  return 'RAMPAGE';
+    if (s >= 3)  return 'KILLING SPREE';
+    if (s >= 2)  return 'DOUBLE CATCH';
+    return 'TRACKED';
+}
+
 const roles = ['Top', 'Jgl', 'Mid', 'Adc', 'Sup'];
 
 // Helper to format time (MM:SS)
@@ -533,7 +545,7 @@ function evaluateTimers(msgText) {
                 }
                 saveStats();
                 
-                showFloatingText(`+${pointsGained} ${typedRole.toUpperCase()} OK!`, '#55ff55');
+                showFloatingText(`${typedRole.toUpperCase()} · ${getCatchCallout(streak)} · +${pointsGained}`, '#55ff88');
             }
         }
     }
