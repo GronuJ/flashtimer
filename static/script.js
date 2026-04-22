@@ -125,16 +125,42 @@ function getRank(s) {
     return r;
 }
 
-// LoL-flavored announcer callouts, scaled to current streak.
+// LoL-flavored announcer callouts. Pools per streak tier, random pick.
+const CALLOUTS = {
+    tracked:     ['TRACKED', 'LOGGED', 'NOTED', 'ON TIMER', 'COUNTED', 'TAGGED', 'CALLED', 'PINGED'],
+    double:      ['DOUBLE CATCH', 'TWO DOWN', 'BACK TO BACK', 'COMBO', 'IN RHYTHM'],
+    spree:       ['KILLING SPREE', 'HEATING UP', 'LOCKED IN', 'ON FIRE', 'DIALED IN', 'FOCUS MODE'],
+    rampage:     ['RAMPAGE', 'UNCAGED', 'WARDED UP', 'BLITZED', 'VISION LORD', 'SHOTCALLER'],
+    dominating:  ['DOMINATING', 'MACRO GOD', 'FULL TEMPO', 'CARRYING', 'SMURFING', 'MIND MELTED'],
+    unstoppable: ['UNSTOPPABLE', 'GALAXY BRAIN', 'FAKER MODE', 'SCRIPTING?', 'INEVITABLE'],
+    godlike:     ['GODLIKE', 'ASCENDED', 'CRACKED', 'APEX TRACKER', 'RIFT KING'],
+    legendary:   ['LEGENDARY', 'CHALLENGER', 'HALL OF FAME', 'LAN FINAL RUN', 'IMMORTAL']
+};
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function getCatchCallout(s) {
-    if (s >= 25) return 'LEGENDARY';
-    if (s >= 17) return 'GODLIKE';
-    if (s >= 12) return 'UNSTOPPABLE';
-    if (s >= 8)  return 'DOMINATING';
-    if (s >= 5)  return 'RAMPAGE';
-    if (s >= 3)  return 'KILLING SPREE';
-    if (s >= 2)  return 'DOUBLE CATCH';
-    return 'TRACKED';
+    if (s >= 25) return pick(CALLOUTS.legendary);
+    if (s >= 17) return pick(CALLOUTS.godlike);
+    if (s >= 12) return pick(CALLOUTS.unstoppable);
+    if (s >= 8)  return pick(CALLOUTS.dominating);
+    if (s >= 5)  return pick(CALLOUTS.rampage);
+    if (s >= 3)  return pick(CALLOUTS.spree);
+    if (s >= 2)  return pick(CALLOUTS.double);
+    return pick(CALLOUTS.tracked);
+}
+
+// Miss sub-text variants — shown in the soft red toast.
+const MISS_SUBS = [
+    'was up at <b>{T}</b> — streak broken',
+    'slipped through — <b>{T}</b>',
+    'too slow — <b>{T}</b>',
+    'forgot this one — <b>{T}</b>',
+    '<b>{T}</b> — watch the tracker',
+    'missed the window — <b>{T}</b>',
+    '<b>{T}</b> — streak reset',
+    'off by a beat — <b>{T}</b>'
+];
+function getMissSub(timeStr) {
+    return pick(MISS_SUBS).replace('{T}', timeStr);
 }
 
 const roles = ['Top', 'Jgl', 'Mid', 'Adc', 'Sup'];
@@ -218,7 +244,7 @@ function showMissNotification(role, missedTime) {
         <div class="miss-toast-icon">✕</div>
         <div class="miss-toast-body">
             <div class="miss-toast-title">MISSED ${role.toUpperCase()}</div>
-            <div class="miss-toast-sub">was up at <b>${missedTime}</b> — streak broken</div>
+            <div class="miss-toast-sub">${getMissSub(missedTime)}</div>
         </div>`;
     document.body.appendChild(card);
     setTimeout(() => card.classList.add('leaving'), 1800);
@@ -492,21 +518,32 @@ function triggerFakeChat() {
     if (!isPracticing || !distractionModeCheckbox.checked) return;
     
     const fakeMessages = [
-        "jg diff",
-        "ff 15",
-        "why did u go in?",
-        "we scale",
-        "lag",
-        "can i get blue buff?",
-        "report mid",
-        "gj",
-        "mb",
-        "wp",
-        "?",
-        "my mouse is broken"
+        "jg diff", "mid diff", "sup diff", "adc diff", "top diff",
+        "ff 15", "ff @15", "/ff",
+        "why did u go in?", "why flash there", "why ult that", "why no wards",
+        "we scale", "late game pls", "just farm", "group mid",
+        "lag", "ping spike", "my internet is dying", "frozen wtf",
+        "can i get blue buff?", "leash pls", "need red", "smite or not?",
+        "report mid", "report jg", "/mute all", "mute pings",
+        "gj", "nice", "wp", "gg", "clean", "huge",
+        "mb", "my bad", "sry", "oops",
+        "?", "??", "???", ". . .",
+        "my mouse is broken", "keyboard sticky", "hand cramp",
+        "omw", "coming", "rotating", "roaming", "b", "recall",
+        "missing", "mia top", "mia mid", "ss bot",
+        "wards plz", "vision???", "ward the bush", "check river",
+        "push", "freeze", "slow push", "proxy",
+        "focus adc", "focus the carry", "peel me", "engage",
+        "sleeper op", "free lp", "ez clap", "insane outplay"
     ];
-    
-    const fakeNames = ["YasuoMain99", "ToxicRiver", "ILoveTeemo", "Gosu123", "HideOnBush"];
+
+    const fakeNames = [
+        "YasuoMain99", "ToxicRiver", "ILoveTeemo", "Gosu123", "HideOnBush",
+        "FlashOnD", "SmurfsOnly", "QSSAndreTrue", "BaronDancer", "0-10 Support",
+        "PerkzFanboy", "TiltProofLOL", "InhibitorEnjoyer", "SoloQHell",
+        "AFKFarmer", "JgAndyyy", "PingMyTeam", "ScriptDetected?",
+        "MonkaGiga", "LateGameKing", "NoHandsMid", "OneTrickAkali"
+    ];
     const name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
     const msgText = fakeMessages[Math.floor(Math.random() * fakeMessages.length)];
     
