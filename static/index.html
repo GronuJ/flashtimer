@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoL Chat Simulator - Practice</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <button id="infoBtn" class="control-btn" title="Information">Info</button>
+            <button id="triggerBtn" class="control-btn" style="display: none;" title="Force a flash event">Trigger Flash</button>
+            <button id="resetBtn" class="control-btn" style="display: none;" title="Reset practice session">Reset</button>
+        </div>
+
+        <!-- Info Modal -->
+        <div id="infoModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModal">&times;</span>
+                <h2>How to use FlashTimer</h2>
+                <p>This tool simulates the League of Legends chat to help you practice tracking summoner spells quickly and efficiently.</p>
+                <h3>The Gamified Practice Loop:</h3>
+                <ol>
+                    <li>Wait for a flash notification on the right side of the screen.</li>
+                    <li>Press <code>Enter</code> to open the chat.</li>
+                    <li>Calculate the timer (+5 minutes for Flash) and type it (e.g., <code>mid1400</code>).</li>
+                    <li>Send the message to score points! You must log it within 60 in-game seconds of the flash happening.</li>
+                    <li>Build up your 🔥 streak for bonus points! If you are too slow, your streak breaks.</li>
+                    <li>Use <code>Cmd/Ctrl + A</code> then <code>C</code> to copy old timers and paste them when new flashes happen to maintain the full list!</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- In-game HUD -->
+        <div class="top-hud">
+            <div class="left-hud">
+                <div class="score-board" id="scoreBoard" style="display: none;">Score: <span id="scoreVal">0</span></div>
+                <div class="accuracy-board" id="accuracyBoard" style="display: none;">Streak: <span id="streakVal">0</span></div>
+            </div>
+            <div id="gameClock">00:00</div>
+        </div>
+        
+        <!-- Start Screen -->
+        <div id="startScreen" class="start-screen">
+            <h2>Flash Timer Practice</h2>
+            
+            <div class="settings-panel">
+                <div class="setting-item">
+                    <label for="clockSpeed">Game Clock Speed:</label>
+                    <select id="clockSpeed">
+                        <option value="1">1x (Real-time)</option>
+                        <option value="2">2x Faster</option>
+                        <option value="5" selected>5x Faster</option>
+                        <option value="10">10x Faster</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="flashFreq">Flash Frequency:</label>
+                    <select id="flashFreq">
+                        <option value="high">High (Every 8-20s real-time)</option>
+                        <option value="medium" selected>Medium (Every 20-40s real-time)</option>
+                        <option value="low">Low (Every 40-70s real-time)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="hardcoreMode">Hidden Timers (Hardcore):</label>
+                    <input type="checkbox" id="hardcoreMode" checked>
+                </div>
+                <div class="setting-item">
+                    <label for="teamfightMode">Simultaneous Spells (Teamfights):</label>
+                    <input type="checkbox" id="teamfightMode" checked>
+                </div>
+                <div class="setting-item">
+                    <label for="distractionMode">Fake Chat Distractions:</label>
+                    <input type="checkbox" id="distractionMode" checked>
+                </div>
+            </div>
+
+            <p><strong>Gamified Loop:</strong></p>
+            <ul style="text-align: left;">
+                <li>Enemies flash randomly. Type the calculated timer (e.g. <code>mid1420</code>) and press Enter!</li>
+                <li>You have 60 in-game seconds to log a flash correctly to score points.</li>
+                <li>Build your streak 🔥 for huge multipliers!</li>
+                <li>Clock speed determines how fast in-game time passes.</li>
+            </ul>
+            <button id="startBtn">Start Practice</button>
+        </div>
+
+        <!-- Flash Notifications -->
+        <div id="notificationArea" class="notification-area"></div>
+
+        <!-- Chat UI -->
+        <div class="chat-hud" id="chatHud">
+            <div class="chat-history" id="chatHistory"></div>
+            <div class="chat-input-container" id="chatInputContainer">
+                <span class="chat-prefix">[All] You: </span>
+                <input type="text" class="chat-input" id="chatInput" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
