@@ -203,25 +203,44 @@ function pulseScore() {
 
 function renderFlashTracker() {
     if (!flashTracker) return;
-    const active = Object.entries(expectedFlashes).filter(([, f]) => f.active);
-    if (active.length === 0) { flashTracker.innerHTML = ''; return; }
-
     const windowMs = getCatchWindowMs();
     const now = Date.now();
-    flashTracker.innerHTML = active.map(([role, f]) => {
+    const activeRoles = new Set(
+        Object.entries(expectedFlashes)
+            .filter(([, f]) => f.active)
+            .map(([role]) => role)
+    );
+
+    // Remove cards whose role is no longer active
+    flashTracker.querySelectorAll('.flash-card').forEach(card => {
+        if (!activeRoles.has(card.dataset.role)) card.remove();
+    });
+
+    // Create or update a card per active role
+    for (const role of activeRoles) {
+        const f = expectedFlashes[role];
         const remainingMs = Math.max(0, windowMs - (now - f.realTimeSpawn));
         const remaining = Math.ceil(remainingMs / 1000);
         const pct = Math.max(0, Math.min(100, (remainingMs / windowMs) * 100));
-        const urgent = remainingMs <= windowMs * 0.33 ? ' urgent' : '';
-        return `
-            <div class="flash-card${urgent}">
+        const urgent = remainingMs <= windowMs * 0.33;
+
+        let card = flashTracker.querySelector(`.flash-card[data-role="${role}"]`);
+        if (!card) {
+            card = document.createElement('div');
+            card.className = 'flash-card';
+            card.dataset.role = role;
+            card.innerHTML = `
                 <div class="flash-card-head">
                     <span class="flash-card-role">${role.toUpperCase()}</span>
-                    <span class="flash-card-time">${remaining}s</span>
+                    <span class="flash-card-time"></span>
                 </div>
-                <div class="flash-card-bar"><div class="flash-card-fill" style="width:${pct}%"></div></div>
-            </div>`;
-    }).join('');
+                <div class="flash-card-bar"><div class="flash-card-fill"></div></div>`;
+            flashTracker.appendChild(card);
+        }
+        card.classList.toggle('urgent', urgent);
+        card.querySelector('.flash-card-time').textContent = `${remaining}s`;
+        card.querySelector('.flash-card-fill').style.width = `${pct}%`;
+    }
 }
 
 // Update clock
