@@ -10,9 +10,42 @@
     <div class="game-container">
         <!-- Controls Bar -->
         <div class="controls-bar">
+            <button id="statsBtn" class="control-btn" title="View Stats">Stats</button>
             <button id="infoBtn" class="control-btn" title="Information">Info</button>
+            <a href="https://github.com/GronuJ/flashtimer" target="_blank" class="control-btn" title="View Source on GitHub">
+                <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: text-bottom; margin-right: 4px;">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>GitHub
+            </a>
             <button id="triggerBtn" class="control-btn" style="display: none;" title="Force a flash event">Trigger Flash</button>
             <button id="resetBtn" class="control-btn" style="display: none;" title="Reset practice session">Reset</button>
+        </div>
+
+        <!-- Stats Modal -->
+        <div id="statsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeStatsModal">&times;</span>
+                <h2>Your Career Stats</h2>
+                <p>Track your daily 5-minute practice improvements over time!</p>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Total Score</div>
+                        <div class="stat-value" id="statTotalScore">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Highest Streak</div>
+                        <div class="stat-value" id="statHighestStreak">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Flashes Caught</div>
+                        <div class="stat-value" id="statFlashesCaught">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Sessions Played</div>
+                        <div class="stat-value" id="statSessionsPlayed">0</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Info Modal -->
@@ -23,11 +56,11 @@
                 <p>This tool simulates the League of Legends chat to help you practice tracking summoner spells quickly and efficiently.</p>
                 <h3>The Gamified Practice Loop:</h3>
                 <ol>
-                    <li>Wait for a flash notification on the right side of the screen.</li>
+                    <li>Wait for a flash notification in the chat window.</li>
                     <li>Press <code>Enter</code> to open the chat.</li>
                     <li>Calculate the timer (+5 minutes for Flash) and type it (e.g., <code>mid1400</code>).</li>
-                    <li>Send the message to score points! You must log it within 60 in-game seconds of the flash happening.</li>
-                    <li>Build up your 🔥 streak for bonus points! If you are too slow, your streak breaks.</li>
+                    <li>Send the message to score points! You must log it within 30 real-time seconds of the flash happening.</li>
+                    <li>Build up your streak for bonus points! If you are too slow, your streak breaks.</li>
                     <li>Use <code>Cmd/Ctrl + A</code> then <code>C</code> to copy old timers and paste them when new flashes happen to maintain the full list!</li>
                 </ol>
             </div>
@@ -66,15 +99,15 @@
                 </div>
                 <div class="setting-item">
                     <label for="hardcoreMode">Hidden Timers (Hardcore):</label>
-                    <input type="checkbox" id="hardcoreMode" checked>
+                    <input type="checkbox" id="hardcoreMode">
                 </div>
                 <div class="setting-item">
                     <label for="teamfightMode">Simultaneous Spells (Teamfights):</label>
-                    <input type="checkbox" id="teamfightMode" checked>
+                    <input type="checkbox" id="teamfightMode">
                 </div>
                 <div class="setting-item">
                     <label for="distractionMode">Fake Chat Distractions:</label>
-                    <input type="checkbox" id="distractionMode" checked>
+                    <input type="checkbox" id="distractionMode">
                 </div>
             </div>
 
@@ -82,14 +115,11 @@
             <ul style="text-align: left;">
                 <li>Enemies flash randomly. Type the calculated timer (e.g. <code>mid1420</code>) and press Enter!</li>
                 <li>You have 60 in-game seconds to log a flash correctly to score points.</li>
-                <li>Build your streak 🔥 for huge multipliers!</li>
+                <li>Build your streak for huge multipliers!</li>
                 <li>Clock speed determines how fast in-game time passes.</li>
             </ul>
             <button id="startBtn">Start Practice</button>
         </div>
-
-        <!-- Flash Notifications -->
-        <div id="notificationArea" class="notification-area"></div>
 
         <!-- Chat UI -->
         <div class="chat-hud" id="chatHud">

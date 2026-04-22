@@ -5,9 +5,16 @@ const chatInput = document.getElementById('chatInput');
 const gameClockEl = document.getElementById('gameClock');
 const startScreen = document.getElementById('startScreen');
 const startBtn = document.getElementById('startBtn');
-const notificationArea = document.getElementById('notificationArea');
 
 // Controls
+const statsBtn = document.getElementById('statsBtn');
+const statsModal = document.getElementById('statsModal');
+const closeStatsModal = document.getElementById('closeStatsModal');
+const statTotalScore = document.getElementById('statTotalScore');
+const statHighestStreak = document.getElementById('statHighestStreak');
+const statFlashesCaught = document.getElementById('statFlashesCaught');
+const statSessionsPlayed = document.getElementById('statSessionsPlayed');
+
 const infoBtn = document.getElementById('infoBtn');
 const triggerBtn = document.getElementById('triggerBtn');
 const resetBtn = document.getElementById('resetBtn');
@@ -24,6 +31,25 @@ const flashFreqSelect = document.getElementById('flashFreq');
 const hardcoreModeCheckbox = document.getElementById('hardcoreMode');
 const teamfightModeCheckbox = document.getElementById('teamfightMode');
 const distractionModeCheckbox = document.getElementById('distractionMode');
+
+// Local Storage Stats
+let stats = JSON.parse(localStorage.getItem('flashTimerStats')) || {
+    totalScore: 0,
+    highestStreak: 0,
+    flashesCaught: 0,
+    sessionsPlayed: 0
+};
+
+function saveStats() {
+    localStorage.setItem('flashTimerStats', JSON.stringify(stats));
+}
+
+function updateStatsModal() {
+    statTotalScore.textContent = stats.totalScore;
+    statHighestStreak.textContent = stats.highestStreak;
+    statFlashesCaught.textContent = stats.flashesCaught;
+    statSessionsPlayed.textContent = stats.sessionsPlayed;
+}
 
 let isChatActive = false;
 let gameTimeSeconds = 0;
@@ -47,14 +73,24 @@ function formatTime(totalSeconds) {
 }
 
 // Show animated floating text
+let activeFloatingTexts = 0;
+
 function showFloatingText(text, color) {
     const el = document.createElement('div');
     el.className = 'floating-text';
     el.textContent = text;
     el.style.color = color;
+    
+    // Stagger vertically if multiple texts appear at once
+    el.style.marginTop = `${activeFloatingTexts * 45}px`;
+    activeFloatingTexts++;
+    
     document.body.appendChild(el);
+    
     setTimeout(() => {
         if (el.parentNode) el.parentNode.removeChild(el);
+        activeFloatingTexts--;
+        if (activeFloatingTexts < 0) activeFloatingTexts = 0;
     }, 1500);
 }
 
@@ -64,12 +100,11 @@ function updateScoreUI() {
     streakVal.textContent = streak;
 }
 
-// Update clock (runs every 1000ms real-time)
+// Update clock
 function updateClock() {
-    const speed = parseInt(clockSpeedSelect.value);
-    gameTimeSeconds += speed;
+    gameTimeSeconds += 1;
     gameClockEl.textContent = formatTime(gameTimeSeconds);
-    
+
     // Check if player missed any active flashes (took too long to type)
     for (const role in expectedFlashes) {
         if (expectedFlashes[role].active) {
@@ -84,7 +119,6 @@ function updateClock() {
         }
     }
 }
-
 // Generate a random flash event
 function triggerRandomFlash(manualRole = null) {
     if (!isPracticing) return;
@@ -114,7 +148,8 @@ function triggerRandomFlash(manualRole = null) {
     expectedFlashes[roleLower] = {
         active: true,
         flashTime: timeFlashedSeconds,
-        time: expectedTimeSeconds
+        time: expectedTimeSeconds,
+        realTimeSpawn: Date.now()
     };
     
     showNotification(`${randomRole} Flashed!`, randomRole, formatTime(timeFlashedSeconds));
@@ -248,7 +283,6 @@ function startPractice() {
     gameTimeSeconds = Math.floor(Math.random() * 360) + 120; 
     gameClockEl.textContent = formatTime(gameTimeSeconds);
     chatHistory.innerHTML = '';
-    notificationArea.innerHTML = '';
     
     clockInterval = setInterval(updateClock, 1000);
     
@@ -277,7 +311,6 @@ function resetPractice() {
     startScreen.style.display = 'block';
     gameClockEl.textContent = "00:00";
     chatHistory.innerHTML = '';
-    notificationArea.innerHTML = '';
     
     if (isChatActive) {
         isChatActive = false;
@@ -308,19 +341,15 @@ window.addEventListener('click', (e) => {
 // Evaluate Gamification from Chat Message
 function evaluateTimers(msgText) {
     const msg = msgText.toLowerCase();
-    // Match e.g. "top 1420", "mid1930", "sup 920"
-    const regex = /(top|jgl|mid|adc|sup)\s*(\d{3,4})/g;
+    // Match e.g. "top 1420", "mid 1930", "sup 920", "adc 8:30"
+    const regex = /(top|jgl|mid|adc|sup)\s*(\d{1,2})[:]?(\d{2})/g;
     let match;
     let hitCount = 0;
 
     while ((match = regex.exec(msg)) !== null) {
         const typedRole = match[1];
-        const typedTimerStr = match[2];
-        
-        // Pad 3 digits to 4 (e.g. 920 -> 0920)
-        const typedTimerPad = typedTimerStr.padStart(4, '0');
-        const m = parseInt(typedTimerPad.substring(0, 2), 10);
-        const s = parseInt(typedTimerPad.substring(2, 4), 10);
+        const m = parseInt(match[2], 10);
+        const s = parseInt(match[3], 10);
         const typedSeconds = m * 60 + s;
         
         if (expectedFlashes[typedRole] && expectedFlashes[typedRole].active) {
@@ -334,6 +363,14 @@ function evaluateTimers(msgText) {
                 const pointsGained = 100 + (streak * 20);
                 score += pointsGained;
                 streak++;
+                
+                // Update Local Storage Stats
+                stats.totalScore += pointsGained;
+                stats.flashesCaught++;
+                if (streak > stats.highestStreak) {
+                    stats.highestStreak = streak;
+                }
+                saveStats();
                 
                 showFloatingText(`+${pointsGained} ${typedRole.toUpperCase()} OK!`, '#55ff55');
             }
@@ -351,6 +388,10 @@ document.addEventListener('keydown', (e) => {
 
     if (e.key === 'Enter') {
         if (!isChatActive) {
+            // Only allow opening chat if there's an active flash to record
+            const hasActiveFlash = Object.values(expectedFlashes).some(flash => flash.active);
+            if (!hasActiveFlash) return;
+
             isChatActive = true;
             chatHud.classList.add('active');
             chatInput.focus();
@@ -400,4 +441,6 @@ function appendMessage(text) {
     
     chatHistory.appendChild(msgDiv);
     chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+ight;
 }
