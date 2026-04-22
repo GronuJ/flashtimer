@@ -312,9 +312,9 @@ body, html {
     bottom: 18px;
     left: 50%;
     transform: translateX(-50%);
-    width: 50vw;
-    max-width: 640px;
-    min-width: 240px;
+    width: 25vw;
+    max-width: 320px;
+    min-width: 120px;
     height: 6px;
     background: rgba(0,0,0,0.55);
     border: 1px solid rgba(255,255,255,0.08);
