@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 72" role="img" aria-label="FlashTimer">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e9d49a"/>
+      <stop offset="100%" stop-color="#c8aa6e"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .wm {
+      font-family: "Helvetica Neue", "Arial Narrow", Impact, sans-serif;
+      font-weight: 900;
+      font-size: 44px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+    }
+  </style>
+
+  <text x="10" y="50" class="wm" fill="url(#goldGrad)">FLASH</text>
+
+  <!-- divider bolt between FLASH and TIMER -->
+  <path d="M207 16 L195 40 L204 40 L198 56 L216 32 L207 32 Z"
+        fill="#0ac8b9"
+        stroke="#0a1428" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <text x="222" y="50" class="wm" fill="url(#goldGrad)">TIMER</text>
+
+  <!-- baseline underline accent -->
+  <rect x="10" y="60" width="398" height="2" fill="#c8aa6e" fill-opacity="0.35"/>
+</svg>
