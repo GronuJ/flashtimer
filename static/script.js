@@ -203,7 +203,7 @@ const rankTier = document.getElementById('rankTier');
 const flashTracker = document.getElementById('flashTracker');
 const sessionLengthSelect = document.getElementById('sessionLength');
 const sessionTimerEl = document.getElementById('sessionTimer');
-const sessionTimerVal = document.getElementById('sessionTimerVal');
+const sessionTimerFill = document.getElementById('sessionTimerFill');
 const resultsModal = document.getElementById('resultsModal');
 const resFinalScore = document.getElementById('resFinalScore');
 const resAccuracy = document.getElementById('resAccuracy');
@@ -328,15 +328,15 @@ function updateClock() {
 
 function updateSessionTimer() {
     if (!sessionEndTime) return;
+    const totalMs = sessionLengthSec * 1000;
     const remainingMs = sessionEndTime - Date.now();
     if (remainingMs <= 0) {
-        sessionTimerVal.textContent = '0:00';
+        sessionTimerFill.style.width = '0%';
         endSession(false);
         return;
     }
-    const total = Math.ceil(remainingMs / 1000);
-    const m = Math.floor(total / 60), s = total % 60;
-    sessionTimerVal.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    const pct = Math.max(0, Math.min(100, (remainingMs / totalMs) * 100));
+    sessionTimerFill.style.width = `${pct}%`;
     sessionTimerEl.classList.toggle('warn', remainingMs <= 30000 && remainingMs > 10000);
     sessionTimerEl.classList.toggle('danger', remainingMs <= 10000);
 }
@@ -573,7 +573,9 @@ function startPractice() {
     sessionLengthSec = parseInt(sessionLengthSelect.value, 10) || 0;
     if (sessionLengthSec > 0) {
         sessionEndTime = Date.now() + sessionLengthSec * 1000;
-        sessionTimerEl.style.display = 'flex';
+        sessionTimerEl.classList.remove('warn', 'danger');
+        sessionTimerFill.style.width = '100%';
+        sessionTimerEl.style.display = 'block';
         updateSessionTimer();
     } else {
         sessionEndTime = 0;

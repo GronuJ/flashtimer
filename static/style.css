@@ -303,26 +303,41 @@ body, html {
 }
 .session-timer {
     position: fixed;
-    bottom: 20px;
+    bottom: 18px;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 6px 16px;
-    background: linear-gradient(90deg, rgba(30,35,40,0.92), rgba(20,24,28,0.85));
-    border: 1px solid rgba(91,192,235,0.4);
-    border-bottom: 3px solid #5bc0eb;
-    border-radius: 4px;
-    font-family: monospace;
-    font-weight: bold;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-    text-shadow: 1px 1px 2px black;
+    width: 50vw;
+    max-width: 640px;
+    min-width: 240px;
+    height: 6px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.55);
     z-index: 150;
     pointer-events: none;
 }
-.session-timer.warn  { border-bottom-color: #ffcc00; border-color: rgba(255,204,0,0.4); }
-.session-timer.danger { border-bottom-color: #ff4f6d; border-color: rgba(255,79,109,0.5); }
+.session-timer-fill {
+    height: 100%;
+    width: 100%;
+    background: #5bc0eb;
+    box-shadow: 0 0 10px rgba(91,192,235,0.55);
+    transition: width 0.25s linear, background 0.2s, box-shadow 0.2s;
+}
+.session-timer.warn  .session-timer-fill {
+    background: #ffcc00;
+    box-shadow: 0 0 10px rgba(255,204,0,0.55);
+}
+.session-timer.danger .session-timer-fill {
+    background: #ff4f6d;
+    box-shadow: 0 0 12px rgba(255,79,109,0.7);
+    animation: sessPulse 1s ease-in-out infinite;
+}
+@keyframes sessPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+}
 .session-timer-label {
     color: #a09b8c;
     font-size: 10px;
