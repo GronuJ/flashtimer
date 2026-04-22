@@ -11,9 +11,46 @@ body, html {
 .game-container {
     width: 100vw;
     height: 100vh;
-    background-image: linear-gradient(#2a3b45, #121c21);
     position: relative;
-    user-select: none; /* Prevent selecting background */
+    user-select: none;
+    overflow: hidden;
+    background-color: #0a1016;
+    background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(200,170,110,0.08), transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(91,192,235,0.06), transparent 55%),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='96' viewBox='0 0 56 96'><g fill='none' stroke='%23c8aa6e' stroke-opacity='0.08' stroke-width='1'><polygon points='28,2 54,16 54,48 28,62 2,48 2,16'/><polygon points='28,50 54,64 54,96 28,110 2,96 2,64'/></g></svg>"),
+        radial-gradient(ellipse at center, #1a2a3a 0%, #0a1016 70%, #05080c 100%);
+    background-repeat: no-repeat, no-repeat, repeat, no-repeat;
+    background-size: auto, auto, 56px 96px, auto;
+}
+
+/* Gold corner brackets — frame the viewport like a client panel */
+.game-container::before,
+.game-container::after {
+    content: "";
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    z-index: 1;
+    border-color: #c8aa6e;
+    border-style: solid;
+    opacity: 0.7;
+}
+.game-container::before {
+    top: 12px; left: 12px;
+    border-width: 2px 0 0 2px;
+}
+.game-container::after {
+    bottom: 12px; right: 12px;
+    border-width: 0 2px 2px 0;
+}
+/* Soft vignette */
+.game-container > .vignette {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+    z-index: 1;
 }
 
 /* Controls Bar */
