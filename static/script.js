@@ -102,6 +102,11 @@ let isPracticing = false;
 let score = 0;
 let streak = 0;
 let sessionBest = 0;
+let sessionCatches = 0;
+let sessionMisses = 0;
+let sessionBestStreak = 0;
+let sessionEndTime = 0; // real-time ms, 0 = unlimited
+let sessionLengthSec = 0;
 let expectedFlashes = {}; // e.g. { 'mid': { active: true, time: 860, flashTime: 560 } }
 
 const RANK_TIERS = [
@@ -170,6 +175,16 @@ const rankBadge = document.getElementById('rankBadge');
 const rankIcon = document.getElementById('rankIcon');
 const rankTier = document.getElementById('rankTier');
 const flashTracker = document.getElementById('flashTracker');
+const sessionLengthSelect = document.getElementById('sessionLength');
+const sessionTimerEl = document.getElementById('sessionTimer');
+const sessionTimerVal = document.getElementById('sessionTimerVal');
+const resultsModal = document.getElementById('resultsModal');
+const resFinalScore = document.getElementById('resFinalScore');
+const resAccuracy = document.getElementById('resAccuracy');
+const resBestStreak = document.getElementById('resBestStreak');
+const resCaught = document.getElementById('resCaught');
+const resNewBest = document.getElementById('resNewBest');
+const resultsContinueBtn = document.getElementById('resultsContinueBtn');
 
 function nextCatchPoints() { return 100 + streak * 20; }
 
@@ -274,6 +289,7 @@ function updateClock() {
         const f = expectedFlashes[role];
         if (f.active && now - f.realTimeSpawn > windowMs) {
             f.active = false;
+            sessionMisses++;
             const prevStreak = streak;
             streak = 0;
             showMissNotification(role, formatTime(f.time));
@@ -281,6 +297,75 @@ function updateClock() {
         }
     }
     renderFlashTracker();
+    updateSessionTimer();
+}
+
+function updateSessionTimer() {
+    if (!sessionEndTime) return;
+    const remainingMs = sessionEndTime - Date.now();
+    if (remainingMs <= 0) {
+        sessionTimerVal.textContent = '0:00';
+        endSession(false);
+        return;
+    }
+    const total = Math.ceil(remainingMs / 1000);
+    const m = Math.floor(total / 60), s = total % 60;
+    sessionTimerVal.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    sessionTimerEl.classList.toggle('warn', remainingMs <= 30000 && remainingMs > 10000);
+    sessionTimerEl.classList.toggle('danger', remainingMs <= 10000);
+}
+
+function endSession(userAborted) {
+    if (!isPracticing) return;
+    isPracticing = false;
+
+    if (clockInterval) clearInterval(clockInterval);
+    if (scenarioTimeout) clearTimeout(scenarioTimeout);
+    if (distractionInterval) clearTimeout(distractionInterval);
+
+    scoreBoard.style.display = 'none';
+    accuracyBoard.style.display = 'none';
+    triggerBtn.style.display = 'none';
+    resetBtn.style.display = 'none';
+    sessionTimerEl.style.display = 'none';
+    flashTracker.innerHTML = '';
+
+    if (isChatActive) {
+        isChatActive = false;
+        chatHud.classList.remove('active');
+        chatInput.value = '';
+        chatInput.blur();
+    }
+
+    // Record session if anything happened
+    const played = sessionCatches + sessionMisses;
+    let isNewBest = false;
+    if (played > 0) {
+        const prevBest = stats.sessions.reduce((m, s) => Math.max(m, s.score || 0), 0);
+        isNewBest = score > prevBest;
+        stats.sessions.push({
+            ts: Date.now(),
+            score,
+            caught: sessionCatches,
+            missed: sessionMisses,
+            bestStreak: sessionBestStreak
+        });
+        if (stats.sessions.length > 50) stats.sessions = stats.sessions.slice(-50);
+        stats.sessionsPlayed++;
+        saveStats();
+    }
+
+    // Populate results
+    const total = sessionCatches + sessionMisses;
+    const acc = total > 0 ? Math.round((sessionCatches / total) * 100) : 0;
+    resFinalScore.textContent = score;
+    resAccuracy.textContent = total > 0 ? `${acc}%` : '—';
+    resBestStreak.textContent = sessionBestStreak;
+    resCaught.textContent = `${sessionCatches} / ${total}`;
+    resNewBest.style.display = isNewBest ? 'inline' : 'none';
+    document.getElementById('resultsTitle').textContent =
+        userAborted ? 'Session Ended' : 'Session Complete';
+    resultsModal.style.display = 'block';
 }
 // Generate a random flash event
 function triggerRandomFlash(manualRole = null) {
@@ -441,9 +526,22 @@ function startPractice() {
     score = 0;
     streak = 0;
     sessionBest = 0;
+    sessionCatches = 0;
+    sessionMisses = 0;
+    sessionBestStreak = 0;
     expectedFlashes = {};
     updateScoreUI();
     renderFlashTracker();
+
+    sessionLengthSec = parseInt(sessionLengthSelect.value, 10) || 0;
+    if (sessionLengthSec > 0) {
+        sessionEndTime = Date.now() + sessionLengthSec * 1000;
+        sessionTimerEl.style.display = 'flex';
+        updateSessionTimer();
+    } else {
+        sessionEndTime = 0;
+        sessionTimerEl.style.display = 'none';
+    }
     
     // 02:00 to 08:00
     gameTimeSeconds = Math.floor(Math.random() * 360) + 120; 
@@ -462,36 +560,22 @@ function startPractice() {
     document.body.focus();
 }
 
-// Reset Practice Session
+// Reset button — end the session early and show results
 function resetPractice() {
-    if (isPracticing && score > 0) {
-        stats.sessions.push({ ts: Date.now(), score });
-        if (stats.sessions.length > 50) stats.sessions = stats.sessions.slice(-50);
-        stats.sessionsPlayed++;
-        saveStats();
-    }
-    isPracticing = false;
-    
-    scoreBoard.style.display = 'none';
-    accuracyBoard.style.display = 'none';
-    triggerBtn.style.display = 'none';
-    resetBtn.style.display = 'none';
-    
-    if (clockInterval) clearInterval(clockInterval);
-    if (scenarioTimeout) clearTimeout(scenarioTimeout);
-    if (distractionInterval) clearTimeout(distractionInterval);
-    
-    startScreen.style.display = 'block';
-    gameClockEl.textContent = "00:00";
-    chatHistory.innerHTML = '';
-    
-    if (isChatActive) {
-        isChatActive = false;
-        chatHud.classList.remove('active');
-        chatInput.value = '';
-        chatInput.blur();
+    if (isPracticing) {
+        endSession(true);
+    } else {
+        startScreen.style.display = 'block';
     }
 }
+
+// Continue from results modal back to start screen
+resultsContinueBtn.addEventListener('click', () => {
+    resultsModal.style.display = 'none';
+    gameClockEl.textContent = '00:00';
+    chatHistory.innerHTML = '';
+    startScreen.style.display = 'block';
+});
 
 // Event Listeners for Buttons
 startBtn.addEventListener('click', startPractice);
@@ -536,8 +620,9 @@ function evaluateTimers(msgText) {
                 const pointsGained = 100 + (streak * 20);
                 score += pointsGained;
                 streak++;
-                
-                // Update Local Storage Stats
+                sessionCatches++;
+                if (streak > sessionBestStreak) sessionBestStreak = streak;
+
                 stats.totalScore += pointsGained;
                 stats.flashesCaught++;
                 if (streak > stats.highestStreak) {
@@ -560,6 +645,8 @@ function evaluateTimers(msgText) {
 // Chat Controls
 document.addEventListener('keydown', (e) => {
     if (infoModal.style.display === 'block') return;
+    if (statsModal.style.display === 'block') return;
+    if (resultsModal.style.display === 'block') return;
 
     if (e.key === 'Enter') {
         if (!isChatActive) {

@@ -109,7 +109,42 @@
                 </div>
                 <div class="flash-tracker" id="flashTracker"></div>
             </div>
-            <div id="gameClock">00:00</div>
+            <div class="right-hud">
+                <div id="gameClock">00:00</div>
+                <div id="sessionTimer" class="session-timer" style="display: none;">
+                    <span class="session-timer-label">Session</span>
+                    <span id="sessionTimerVal">5:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Modal -->
+        <div id="resultsModal" class="modal">
+            <div class="modal-content">
+                <h2 id="resultsTitle">Session Complete</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Final Score</div>
+                        <div class="stat-value" id="resFinalScore">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-value" id="resAccuracy">—</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Best Streak</div>
+                        <div class="stat-value" id="resBestStreak">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Caught / Total</div>
+                        <div class="stat-value" id="resCaught">0 / 0</div>
+                    </div>
+                </div>
+                <div class="results-footer">
+                    <span id="resNewBest" class="results-new-best" style="display:none;">★ New Personal Best</span>
+                    <button id="resultsContinueBtn" class="results-btn">Continue</button>
+                </div>
+            </div>
         </div>
         
         <!-- Start Screen -->
@@ -145,6 +180,15 @@
                 <div class="setting-item">
                     <label for="distractionMode">Fake Chat Distractions:</label>
                     <input type="checkbox" id="distractionMode">
+                </div>
+                <div class="setting-item">
+                    <label for="sessionLength">Session Length:</label>
+                    <select id="sessionLength">
+                        <option value="180">3 minutes</option>
+                        <option value="300" selected>5 minutes</option>
+                        <option value="600">10 minutes</option>
+                        <option value="0">Unlimited</option>
+                    </select>
                 </div>
             </div>
 

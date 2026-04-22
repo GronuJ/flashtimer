@@ -281,10 +281,16 @@ body, html {
     margin-top: 19px; /* nudge ~0.5cm down from the viewport top */
 }
 
+.right-hud {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    margin-right: 15px;
+    margin-top: 19px;
+    pointer-events: none;
+}
 #gameClock {
-    position: absolute;
-    top: 15px;
-    right: 15px;
     font-size: 14px;
     color: #ffffff;
     background-color: rgba(0, 0, 0, 0.7);
@@ -295,6 +301,67 @@ body, html {
     font-family: monospace;
     text-shadow: 1px 1px 1px black;
 }
+.session-timer {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 10px;
+    background: linear-gradient(90deg, rgba(30,35,40,0.92), rgba(20,24,28,0.85));
+    border-right: 3px solid #5bc0eb;
+    border-radius: 3px 0 0 3px;
+    font-family: monospace;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    text-shadow: 1px 1px 2px black;
+}
+.session-timer-label {
+    color: #a09b8c;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-family: Arial, sans-serif;
+}
+.session-timer span:last-child {
+    color: #5bc0eb;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+}
+.session-timer.warn span:last-child { color: #ffcc00; }
+.session-timer.danger span:last-child { color: #ff4f6d; animation: sessPulse 1s ease-in-out infinite; }
+@keyframes sessPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+}
+
+/* Results modal footer */
+.results-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 22px;
+}
+.results-new-best {
+    color: #c8aa6e;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 13px;
+    text-shadow: 0 0 10px rgba(200,170,110,0.5);
+}
+.results-btn {
+    background: linear-gradient(180deg, #c8aa6e 0%, #a08548 100%);
+    color: #0a1016;
+    border: none;
+    padding: 10px 24px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 14px;
+    margin-left: auto;
+}
+.results-btn:hover { filter: brightness(1.15); }
 
 .score-board, .rank-board {
     font-size: 14px;
@@ -523,64 +590,51 @@ body, html {
     display: none;
 }
 
-/* Miss toast — themed notification for dropped flashes */
+/* Miss toast — subtle dropped-flash notification */
 .miss-toast {
     position: fixed;
-    top: 80px;
+    top: 70px;
     left: 50%;
-    transform: translateX(-50%) translateY(-8px);
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 18px 10px 14px;
-    background: linear-gradient(90deg, rgba(60,12,18,0.95), rgba(20,10,14,0.95));
-    border: 1px solid #ff4f6d;
-    border-left: 4px solid #ff4f6d;
-    border-radius: 4px;
-    box-shadow: 0 8px 28px rgba(255,79,109,0.35), 0 2px 6px rgba(0,0,0,0.6), inset 0 0 18px rgba(255,79,109,0.08);
-    color: #ffd7de;
+    gap: 9px;
+    padding: 6px 12px 6px 10px;
+    background: rgba(20,24,30,0.88);
+    border-left: 3px solid #c85a6e;
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    color: #c0c5cc;
     font-family: Arial, sans-serif;
     z-index: 1500;
     pointer-events: none;
     opacity: 0;
-    animation: missIn 0.28s ease-out forwards;
+    animation: missIn 0.22s ease-out forwards;
 }
-.miss-toast.leaving {
-    animation: missOut 0.35s ease-in forwards;
-}
+.miss-toast.leaving { animation: missOut 0.28s ease-in forwards; }
 @keyframes missIn {
-    0%   { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.96); }
-    60%  { transform: translateX(-50%) translateY(2px)   scale(1.02); }
-    100% { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
+    from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 @keyframes missOut {
-    to { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.98); }
+    to { opacity: 0; transform: translateX(-50%) translateY(-6px); }
 }
 .miss-toast-icon {
-    width: 28px; height: 28px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    background: rgba(255,79,109,0.15);
-    border: 1.5px solid #ff4f6d;
-    color: #ff4f6d;
-    font-weight: 900;
-    font-size: 16px;
-    text-shadow: 0 0 8px rgba(255,79,109,0.6);
+    color: #c85a6e;
+    font-size: 13px;
+    font-weight: 700;
 }
 .miss-toast-title {
-    font-weight: 900;
-    letter-spacing: 0.15em;
-    font-size: 13px;
-    color: #ff8698;
-    text-shadow: 0 0 10px rgba(255,79,109,0.4);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    color: #c85a6e;
 }
 .miss-toast-sub {
     font-size: 11px;
-    letter-spacing: 0.05em;
-    color: #e3b3bb;
-    opacity: 0.85;
+    color: #8a8f96;
 }
-.miss-toast-sub b { color: #fff0c8; }
+.miss-toast-sub b { color: #c8aa6e; font-weight: 600; }
 
 /* Floating Gamification Text */
 .floating-text {
