@@ -127,14 +127,14 @@ function getRank(s) {
 
 // LoL-flavored announcer callouts. Pools per streak tier, random pick.
 const CALLOUTS = {
-    tracked:     ['TRACKED', 'LOGGED', 'NOTED', 'ON TIMER', 'COUNTED', 'TAGGED', 'CALLED', 'PINGED'],
-    double:      ['DOUBLE CATCH', 'TWO DOWN', 'BACK TO BACK', 'COMBO', 'IN RHYTHM'],
-    spree:       ['KILLING SPREE', 'HEATING UP', 'LOCKED IN', 'ON FIRE', 'DIALED IN', 'FOCUS MODE'],
-    rampage:     ['RAMPAGE', 'UNCAGED', 'WARDED UP', 'BLITZED', 'VISION LORD', 'SHOTCALLER'],
-    dominating:  ['DOMINATING', 'MACRO GOD', 'FULL TEMPO', 'CARRYING', 'SMURFING', 'MIND MELTED'],
-    unstoppable: ['UNSTOPPABLE', 'GALAXY BRAIN', 'FAKER MODE', 'SCRIPTING?', 'INEVITABLE'],
-    godlike:     ['GODLIKE', 'ASCENDED', 'CRACKED', 'APEX TRACKER', 'RIFT KING'],
-    legendary:   ['LEGENDARY', 'CHALLENGER', 'HALL OF FAME', 'LAN FINAL RUN', 'IMMORTAL']
+    tracked:     ['TRACKED', 'LOGGED', 'NOTED', 'ON TIMER', 'COUNTED'],
+    double:      ['DOUBLE CATCH', 'BACK TO BACK', 'TWO DOWN'],
+    spree:       ['KILLING SPREE', 'LOCKED IN', 'DIALED IN', 'ON FIRE'],
+    rampage:     ['RAMPAGE', 'IN CONTROL', 'SHOTCALLER'],
+    dominating:  ['DOMINATING', 'CARRYING', 'FULL TEMPO'],
+    unstoppable: ['UNSTOPPABLE', 'RELENTLESS'],
+    godlike:     ['GODLIKE', 'APEX'],
+    legendary:   ['LEGENDARY', 'CHALLENGER']
 };
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function getCatchCallout(s) {
