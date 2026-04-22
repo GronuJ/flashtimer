@@ -245,11 +245,11 @@ function renderFlashTracker() {
 
 // Update clock
 function getCatchWindowMs() {
-    // Difficulty = flash frequency: high freq → hardest → shortest window
-    const f = flashFreqSelect.value;
-    if (f === 'high')   return 5000;
-    if (f === 'low')    return 15000;
-    return 10000; // medium
+    // 30 in-game seconds translated to real time via clockSpeed, floored at 3s.
+    // Keeps window orthogonal to flashFreq (which only controls pacing) and
+    // mirrors how you track flash in a real LoL game.
+    const speed = parseFloat(clockSpeedSelect.value) || 1;
+    return Math.max(3000, (30 * 1000) / speed);
 }
 
 function updateClock() {
