@@ -442,5 +442,16 @@ function appendMessage(text) {
     chatHistory.appendChild(msgDiv);
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
-ight;
-}
+
+statsBtn.addEventListener('click', () => {
+    updateStatsModal();
+    statsModal.style.display = 'block';
+});
+closeStatsModal.addEventListener('click', () => {
+    statsModal.style.display = 'none';
+});
+window.addEventListener('click', (e) => {
+    if (e.target === statsModal) {
+        statsModal.style.display = 'none';
+    }
+});
