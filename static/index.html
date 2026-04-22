@@ -75,8 +75,27 @@
         <!-- In-game HUD -->
         <div class="top-hud">
             <div class="left-hud">
-                <div class="score-board" id="scoreBoard" style="display: none;">Score: <span id="scoreVal">0</span></div>
-                <div class="accuracy-board" id="accuracyBoard" style="display: none;">Streak: <span id="streakVal">0</span></div>
+                <div class="score-board" id="scoreBoard" style="display: none;">
+                    <div class="score-row">
+                        <span class="score-label">Score</span>
+                        <span id="scoreVal" class="score-num">0</span>
+                        <span class="score-next" id="scoreNext">+100</span>
+                    </div>
+                    <div class="score-row score-best">
+                        <span class="score-label">Best</span>
+                        <span id="scoreBest">0</span>
+                    </div>
+                </div>
+                <div class="rank-board" id="accuracyBoard" style="display: none;">
+                    <div class="rank-badge" id="rankBadge">
+                        <span class="rank-icon" id="rankIcon">◇</span>
+                        <div class="rank-text">
+                            <div class="rank-tier" id="rankTier">Unranked</div>
+                            <div class="rank-streak">Streak <span id="streakVal">0</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flash-tracker" id="flashTracker"></div>
             </div>
             <div id="gameClock">00:00</div>
         </div>

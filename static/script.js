@@ -101,7 +101,24 @@ let isPracticing = false;
 // Gamification State
 let score = 0;
 let streak = 0;
+let sessionBest = 0;
 let expectedFlashes = {}; // e.g. { 'mid': { active: true, time: 860, flashTime: 560 } }
+
+const RANK_TIERS = [
+    { min: 0,  name: 'Unranked', color: '#7a7a7a', icon: '◇' },
+    { min: 1,  name: 'Iron',     color: '#7a6b5c', icon: '◆' },
+    { min: 3,  name: 'Bronze',   color: '#b08050', icon: '◆' },
+    { min: 5,  name: 'Silver',   color: '#c0c0c0', icon: '◆' },
+    { min: 8,  name: 'Gold',     color: '#c8aa6e', icon: '★' },
+    { min: 12, name: 'Platinum', color: '#5bc0eb', icon: '★' },
+    { min: 17, name: 'Diamond',  color: '#b58bf5', icon: '✦' },
+    { min: 25, name: 'Master',   color: '#ff4f6d', icon: '✦' }
+];
+function getRank(s) {
+    let r = RANK_TIERS[0];
+    for (const tier of RANK_TIERS) if (s >= tier.min) r = tier;
+    return r;
+}
 
 const roles = ['Top', 'Jgl', 'Mid', 'Adc', 'Sup'];
 
@@ -135,9 +152,60 @@ function showFloatingText(text, color) {
 }
 
 // Update gamification UI
-function updateScoreUI() {
+const scoreNextEl = document.getElementById('scoreNext');
+const scoreBestEl = document.getElementById('scoreBest');
+const rankBadge = document.getElementById('rankBadge');
+const rankIcon = document.getElementById('rankIcon');
+const rankTier = document.getElementById('rankTier');
+const flashTracker = document.getElementById('flashTracker');
+
+function nextCatchPoints() { return 100 + streak * 20; }
+
+function updateScoreUI(prevStreak = streak) {
     scoreVal.textContent = score;
     streakVal.textContent = streak;
+    scoreNextEl.textContent = `+${nextCatchPoints()}`;
+
+    if (score > sessionBest) sessionBest = score;
+    scoreBestEl.textContent = sessionBest;
+
+    const rank = getRank(streak);
+    rankIcon.textContent = rank.icon;
+    rankTier.textContent = rank.name;
+    rankBadge.style.setProperty('--rank-color', rank.color);
+
+    if (prevStreak > 0 && streak === 0) {
+        rankBadge.classList.remove('streak-break');
+        void rankBadge.offsetWidth;
+        rankBadge.classList.add('streak-break');
+    }
+}
+
+function pulseScore() {
+    scoreVal.classList.remove('score-pulse');
+    void scoreVal.offsetWidth;
+    scoreVal.classList.add('score-pulse');
+}
+
+function renderFlashTracker() {
+    if (!flashTracker) return;
+    const active = Object.entries(expectedFlashes).filter(([, f]) => f.active);
+    if (active.length === 0) { flashTracker.innerHTML = ''; return; }
+
+    flashTracker.innerHTML = active.map(([role, f]) => {
+        const deadline = f.flashTime + 60;
+        const remaining = Math.max(0, deadline - gameTimeSeconds);
+        const pct = Math.max(0, Math.min(100, (remaining / 60) * 100));
+        const urgent = remaining <= 15 ? ' urgent' : '';
+        return `
+            <div class="flash-card${urgent}">
+                <div class="flash-card-head">
+                    <span class="flash-card-role">${role.toUpperCase()}</span>
+                    <span class="flash-card-time">${remaining}s</span>
+                </div>
+                <div class="flash-card-bar"><div class="flash-card-fill" style="width:${pct}%"></div></div>
+            </div>`;
+    }).join('');
 }
 
 // Update clock
@@ -145,19 +213,19 @@ function updateClock() {
     gameTimeSeconds += 1;
     gameClockEl.textContent = formatTime(gameTimeSeconds);
 
-    // Check if player missed any active flashes (took too long to type)
     for (const role in expectedFlashes) {
         if (expectedFlashes[role].active) {
-            // Player has 60 in-game seconds after the flash to type it
             if (gameTimeSeconds > expectedFlashes[role].flashTime + 60) {
-                expectedFlashes[role].active = false; // Mark as dropped
-                streak = 0; // Break streak
+                expectedFlashes[role].active = false;
+                const prevStreak = streak;
+                streak = 0;
                 const missedTime = formatTime(expectedFlashes[role].time);
                 showFloatingText(`Missed ${role.toUpperCase()}! Was ${missedTime}`, '#ff4444');
-                updateScoreUI();
+                updateScoreUI(prevStreak);
             }
         }
     }
+    renderFlashTracker();
 }
 // Generate a random flash event
 function triggerRandomFlash(manualRole = null) {
@@ -316,8 +384,10 @@ function startPractice() {
     
     score = 0;
     streak = 0;
+    sessionBest = 0;
     expectedFlashes = {};
     updateScoreUI();
+    renderFlashTracker();
     
     // 02:00 to 08:00
     gameTimeSeconds = Math.floor(Math.random() * 360) + 120; 
@@ -422,9 +492,11 @@ function evaluateTimers(msgText) {
             }
         }
     }
-    
+
     if (hitCount > 0) {
         updateScoreUI();
+        pulseScore();
+        renderFlashTracker();
     }
 }
 

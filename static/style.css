@@ -301,24 +301,164 @@ body, html {
     text-shadow: 1px 1px 1px black;
 }
 
-.score-board, .accuracy-board {
-    font-size: 16px;
+.score-board, .rank-board {
+    font-size: 14px;
     color: #e0e0e0;
-    background: linear-gradient(90deg, rgba(30,35,40,0.9) 0%, rgba(20,24,28,0.8) 100%);
+    background: linear-gradient(90deg, rgba(30,35,40,0.92) 0%, rgba(20,24,28,0.85) 100%);
     border-left: 3px solid #c8aa6e;
     border-radius: 0 4px 4px 0;
-    padding: 8px 15px;
+    padding: 8px 14px;
     font-weight: bold;
     text-shadow: 1px 1px 2px black;
     box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    letter-spacing: 0.05em;
+    min-width: 180px;
+}
+.score-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.score-row + .score-row { margin-top: 2px; }
+.score-label {
+    color: #a09b8c;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.1em;
+}
+.score-num {
+    color: #c8aa6e;
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 10px rgba(200,170,110,0.45);
+    display: inline-block;
+    transition: transform 0.15s;
+}
+.score-num.score-pulse {
+    animation: scorePulse 0.45s ease-out;
+}
+@keyframes scorePulse {
+    0%   { transform: scale(1);    color: #c8aa6e; }
+    30%  { transform: scale(1.25); color: #fff0c8; text-shadow: 0 0 18px #c8aa6e; }
+    100% { transform: scale(1);    color: #c8aa6e; }
+}
+.score-next {
+    color: #55ff88;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: auto;
+    opacity: 0.85;
+}
+.score-best span, .score-best .score-label { color: #a09b8c; }
+.score-best #scoreBest {
+    color: #5bc0eb;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
 }
 
-.score-board span, .accuracy-board span {
+/* Rank badge */
+.rank-board { --rank-color: #7a7a7a; border-left-color: var(--rank-color); }
+.rank-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s;
+}
+.rank-icon {
+    font-size: 28px;
+    color: var(--rank-color);
+    text-shadow: 0 0 12px var(--rank-color);
+    line-height: 1;
+}
+.rank-tier {
+    color: var(--rank-color);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+.rank-streak {
+    color: #a09b8c;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.rank-streak span {
     color: #c8aa6e;
-    font-size: 18px;
-    margin-left: 5px;
+    font-size: 13px;
+    margin-left: 4px;
+}
+.rank-badge.streak-break {
+    animation: streakBreak 0.55s ease-out;
+}
+@keyframes streakBreak {
+    0%   { transform: translateX(0) rotate(0);     filter: none; }
+    15%  { transform: translateX(-6px) rotate(-2deg); filter: hue-rotate(-30deg) brightness(1.4); }
+    30%  { transform: translateX(6px)  rotate(2deg);  }
+    45%  { transform: translateX(-4px) rotate(-1deg); }
+    60%  { transform: translateX(4px)  rotate(1deg);  }
+    100% { transform: translateX(0)    rotate(0);     filter: none; }
+}
+
+/* Flash tracker — pending flashes with countdown bar */
+.flash-tracker {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+    pointer-events: none;
+}
+.flash-card {
+    background: linear-gradient(90deg, rgba(30,35,40,0.92), rgba(20,24,28,0.85));
+    border-left: 3px solid #5bc0eb;
+    border-radius: 0 4px 4px 0;
+    padding: 6px 10px;
+    min-width: 180px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    animation: flashCardIn 0.2s ease-out;
+}
+@keyframes flashCardIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.flash-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+}
+.flash-card-role {
+    color: #ffcc00;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+}
+.flash-card-time {
+    color: #e0e0e0;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+.flash-card-bar {
+    height: 4px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.flash-card-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #5bc0eb, #c8aa6e);
+    transition: width 0.4s linear;
+}
+.flash-card.urgent {
+    border-left-color: #ff4f6d;
+    animation: flashCardPulse 0.8s ease-in-out infinite;
+}
+.flash-card.urgent .flash-card-fill {
+    background: linear-gradient(90deg, #ff4f6d, #ffcc00);
+}
+.flash-card.urgent .flash-card-time { color: #ff6b82; }
+@keyframes flashCardPulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+    50%      { box-shadow: 0 2px 14px rgba(255,79,109,0.5); }
 }
 
 .stats-grid {
