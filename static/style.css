@@ -302,18 +302,27 @@ body, html {
     text-shadow: 1px 1px 1px black;
 }
 .session-timer {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: baseline;
-    gap: 8px;
-    padding: 4px 10px;
+    gap: 10px;
+    padding: 6px 16px;
     background: linear-gradient(90deg, rgba(30,35,40,0.92), rgba(20,24,28,0.85));
-    border-right: 3px solid #5bc0eb;
-    border-radius: 3px 0 0 3px;
+    border: 1px solid rgba(91,192,235,0.4);
+    border-bottom: 3px solid #5bc0eb;
+    border-radius: 4px;
     font-family: monospace;
     font-weight: bold;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
     text-shadow: 1px 1px 2px black;
+    z-index: 150;
+    pointer-events: none;
 }
+.session-timer.warn  { border-bottom-color: #ffcc00; border-color: rgba(255,204,0,0.4); }
+.session-timer.danger { border-bottom-color: #ff4f6d; border-color: rgba(255,79,109,0.5); }
 .session-timer-label {
     color: #a09b8c;
     font-size: 10px;
@@ -362,6 +371,42 @@ body, html {
     margin-left: auto;
 }
 .results-btn:hover { filter: brightness(1.15); }
+
+.accuracy-board {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 14px;
+    background: linear-gradient(90deg, rgba(30,35,40,0.92) 0%, rgba(20,24,28,0.85) 100%);
+    border-left: 3px solid #5bc0eb;
+    border-radius: 0 4px 4px 0;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    min-width: 180px;
+}
+.accuracy-label {
+    color: #a09b8c;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+#accuracyVal {
+    color: #5bc0eb;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 8px rgba(91,192,235,0.35);
+}
+.accuracy-sub {
+    color: #7a8088;
+    font-size: 11px;
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+}
+.accuracy-board.low    { border-left-color: #ff4f6d; }
+.accuracy-board.low #accuracyVal    { color: #ff6b82; text-shadow: 0 0 8px rgba(255,79,109,0.35); }
+.accuracy-board.mid    { border-left-color: #ffcc00; }
+.accuracy-board.mid #accuracyVal    { color: #ffcc00; text-shadow: 0 0 8px rgba(255,204,0,0.35); }
 
 .score-board, .rank-board {
     font-size: 14px;

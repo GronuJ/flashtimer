@@ -175,6 +175,9 @@ const rankBadge = document.getElementById('rankBadge');
 const rankIcon = document.getElementById('rankIcon');
 const rankTier = document.getElementById('rankTier');
 const flashTracker = document.getElementById('flashTracker');
+const accuracyLiveBoard = document.getElementById('accuracyLiveBoard');
+const accuracyVal = document.getElementById('accuracyVal');
+const accuracySub = document.getElementById('accuracySub');
 const sessionLengthSelect = document.getElementById('sessionLength');
 const sessionTimerEl = document.getElementById('sessionTimer');
 const sessionTimerVal = document.getElementById('sessionTimerVal');
@@ -220,6 +223,22 @@ function showMissNotification(role, missedTime) {
     document.body.appendChild(card);
     setTimeout(() => card.classList.add('leaving'), 1800);
     setTimeout(() => card.remove(), 2200);
+}
+
+function updateAccuracyUI() {
+    if (!accuracyLiveBoard) return;
+    const total = sessionCatches + sessionMisses;
+    if (total === 0) {
+        accuracyVal.textContent = '—';
+        accuracySub.textContent = '0/0';
+        accuracyLiveBoard.classList.remove('low', 'mid');
+        return;
+    }
+    const pct = Math.round((sessionCatches / total) * 100);
+    accuracyVal.textContent = `${pct}%`;
+    accuracySub.textContent = `${sessionCatches}/${total}`;
+    accuracyLiveBoard.classList.toggle('low', pct < 50);
+    accuracyLiveBoard.classList.toggle('mid', pct >= 50 && pct < 75);
 }
 
 function pulseScore() {
@@ -298,6 +317,7 @@ function updateClock() {
     }
     renderFlashTracker();
     updateSessionTimer();
+    updateAccuracyUI();
 }
 
 function updateSessionTimer() {
@@ -325,6 +345,7 @@ function endSession(userAborted) {
 
     scoreBoard.style.display = 'none';
     accuracyBoard.style.display = 'none';
+    accuracyLiveBoard.style.display = 'none';
     triggerBtn.style.display = 'none';
     resetBtn.style.display = 'none';
     sessionTimerEl.style.display = 'none';
@@ -520,6 +541,7 @@ function startPractice() {
     // Show gamification UI
     scoreBoard.style.display = 'block';
     accuracyBoard.style.display = 'block';
+    accuracyLiveBoard.style.display = 'flex';
     triggerBtn.style.display = 'inline-flex';
     resetBtn.style.display = 'inline-flex';
     
@@ -531,6 +553,7 @@ function startPractice() {
     sessionBestStreak = 0;
     expectedFlashes = {};
     updateScoreUI();
+    updateAccuracyUI();
     renderFlashTracker();
 
     sessionLengthSec = parseInt(sessionLengthSelect.value, 10) || 0;
@@ -639,6 +662,7 @@ function evaluateTimers(msgText) {
         updateScoreUI();
         pulseScore();
         renderFlashTracker();
+        updateAccuracyUI();
     }
 }
 
