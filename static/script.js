@@ -37,8 +37,10 @@ let stats = JSON.parse(localStorage.getItem('flashTimerStats')) || {
     totalScore: 0,
     highestStreak: 0,
     flashesCaught: 0,
-    sessionsPlayed: 0
+    sessionsPlayed: 0,
+    sessions: []
 };
+if (!Array.isArray(stats.sessions)) stats.sessions = [];
 
 function saveStats() {
     localStorage.setItem('flashTimerStats', JSON.stringify(stats));
@@ -49,6 +51,44 @@ function updateStatsModal() {
     statHighestStreak.textContent = stats.highestStreak;
     statFlashesCaught.textContent = stats.flashesCaught;
     statSessionsPlayed.textContent = stats.sessionsPlayed;
+    renderSessionChart();
+}
+
+function renderSessionChart() {
+    const svg = document.getElementById('statChart');
+    const empty = document.getElementById('statChartEmpty');
+    if (!svg) return;
+
+    const data = stats.sessions.slice(-20);
+    if (data.length === 0) {
+        svg.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+    svg.style.display = 'block';
+    empty.style.display = 'none';
+
+    const W = 300, H = 100, pad = 6;
+    const maxScore = Math.max(...data.map(s => s.score), 1);
+    const n = data.length;
+    const xAt = i => n === 1 ? W / 2 : pad + (i * (W - 2 * pad)) / (n - 1);
+    const yAt = v => H - pad - (v / maxScore) * (H - 2 * pad);
+
+    const linePts = data.map((s, i) => `${xAt(i)},${yAt(s.score)}`).join(' ');
+    const areaPts = `${pad},${H - pad} ${linePts} ${W - pad},${H - pad}`;
+    const lastX = xAt(n - 1), lastY = yAt(data[n - 1].score);
+
+    svg.innerHTML = `
+        <defs>
+            <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c8aa6e" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#c8aa6e" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <polygon points="${areaPts}" fill="url(#chartFill)"/>
+        <polyline points="${linePts}" fill="none" stroke="#c8aa6e" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        <circle cx="${lastX}" cy="${lastY}" r="2.5" fill="#5bc0eb"/>
+    `;
 }
 
 let isChatActive = false;
@@ -297,6 +337,12 @@ function startPractice() {
 
 // Reset Practice Session
 function resetPractice() {
+    if (isPracticing && score > 0) {
+        stats.sessions.push({ ts: Date.now(), score });
+        if (stats.sessions.length > 50) stats.sessions = stats.sessions.slice(-50);
+        stats.sessionsPlayed++;
+        saveStats();
+    }
     isPracticing = false;
     
     scoreBoard.style.display = 'none';
