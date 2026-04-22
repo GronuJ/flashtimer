@@ -652,7 +652,8 @@ body, html {
     top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 36px;
+    font-size: 48px;
+    letter-spacing: 0.04em;
     font-weight: bold;
     pointer-events: none;
     z-index: 1000;
