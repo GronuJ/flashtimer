@@ -132,7 +132,7 @@ function renderSessionChart() {
 let isChatActive = false;
 let bubbleTimeout = null;
 let bubblesBanked = 0;
-const BUBBLE_BANK_MAX = 20;
+const BUBBLE_BANK_MAX = Infinity;
 const BUBBLE_BANK_PER_STACK = 0.2;
 let gameTimeSeconds = 0;
 let clockInterval = null;
@@ -525,7 +525,9 @@ function spawnBubble() {
         clearTimeout(expireTimer);
         if (bubblesBanked < BUBBLE_BANK_MAX) bubblesBanked++;
         score += 25;
-        playTone(1100, 70, 'sine', 0.05);
+        // Pitch climbs with the bank — capped so very high stacks stay audible.
+        const pitch = Math.min(2400, 700 + bubblesBanked * 60);
+        playTone(pitch, 70, 'sine', 0.05);
         b.classList.add('pop');
         showFloatingText(`🫧 +25 · BANK ×${bubbleBankMult().toFixed(1)}`, '#c8aa6e');
         updateScoreUI();
