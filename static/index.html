@@ -77,7 +77,7 @@
                     <li>Wait for a flash notification in the chat window.</li>
                     <li>Press <code>Enter</code> to open the chat.</li>
                     <li>Calculate the timer (+5 minutes for Flash) and type it (e.g., <code>mid1400</code>).</li>
-                    <li>Send the message to score points! You must log it within 30 real-time seconds of the flash happening.</li>
+                    <li>Send the message to score points! You must log it within 15 real-time seconds of the flash happening.</li>
                     <li>Build up your streak for bonus points! If you are too slow, your streak breaks.</li>
                     <li>Use <code>Cmd/Ctrl + A</code> then <code>C</code> to copy old timers and paste them when new flashes happen to maintain the full list!</li>
                 </ol>
@@ -157,15 +157,15 @@
                     <select id="clockSpeed">
                         <option value="1">1x (Real-time)</option>
                         <option value="2">2x Faster</option>
-                        <option value="5" selected>5x Faster</option>
-                        <option value="10">10x Faster</option>
+                        <option value="5">5x Faster</option>
+                        <option value="10" selected>10x Faster</option>
                     </select>
                 </div>
                 <div class="setting-item">
                     <label for="flashFreq">Flash Frequency:</label>
                     <select id="flashFreq">
-                        <option value="high">High (Every 8-20s real-time)</option>
-                        <option value="medium" selected>Medium (Every 20-40s real-time)</option>
+                        <option value="high" selected>High (Every 8-20s real-time)</option>
+                        <option value="medium">Medium (Every 20-40s real-time)</option>
                         <option value="low">Low (Every 40-70s real-time)</option>
                     </select>
                 </div>
@@ -179,7 +179,7 @@
                 </div>
                 <div class="setting-item">
                     <label for="distractionMode">Fake Chat Distractions:</label>
-                    <input type="checkbox" id="distractionMode">
+                    <input type="checkbox" id="distractionMode" checked>
                 </div>
                 <div class="setting-item">
                     <label for="sessionLength">Session Length:</label>
@@ -195,7 +195,7 @@
             <p><strong>Gamified Loop:</strong></p>
             <ul style="text-align: left;">
                 <li>Enemies flash randomly. Type the calculated timer (e.g. <code>mid1420</code>) and press Enter!</li>
-                <li>You have 60 in-game seconds to log a flash correctly to score points.</li>
+                <li>You have 15 real-time seconds to log a flash correctly to score points.</li>
                 <li>Build your streak for huge multipliers!</li>
                 <li>Clock speed determines how fast in-game time passes.</li>
             </ul>

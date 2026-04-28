@@ -248,6 +248,26 @@ function showMissNotification(role, missedTime) {
     setTimeout(() => card.remove(), 2200);
 }
 
+let chatBlockedToast = null;
+function showChatBlockedNotification() {
+    if (chatBlockedToast) return; // dedupe rapid Enter presses
+    const card = document.createElement('div');
+    card.className = 'miss-toast';
+    card.innerHTML = `
+        <div class="miss-toast-icon">!</div>
+        <div class="miss-toast-body">
+            <div class="miss-toast-title">NO ACTIVE FLASH</div>
+            <div class="miss-toast-sub">wait for an enemy to flash before logging</div>
+        </div>`;
+    document.body.appendChild(card);
+    chatBlockedToast = card;
+    setTimeout(() => card.classList.add('leaving'), 1400);
+    setTimeout(() => {
+        card.remove();
+        if (chatBlockedToast === card) chatBlockedToast = null;
+    }, 1800);
+}
+
 function pulseScore() {
     scoreVal.classList.remove('score-pulse');
     void scoreVal.offsetWidth;
@@ -298,11 +318,9 @@ function renderFlashTracker() {
 
 // Update clock
 function getCatchWindowMs() {
-    // 30 in-game seconds translated to real time via clockSpeed, floored at 3s.
-    // Keeps window orthogonal to flashFreq (which only controls pacing) and
-    // mirrors how you track flash in a real LoL game.
-    const speed = parseFloat(clockSpeedSelect.value) || 1;
-    return Math.max(3000, (30 * 1000) / speed);
+    // Fixed real-time window so the typing budget doesn't shrink at high
+    // clock speeds (at 10x the old in-game-scaled window collapsed to 3s).
+    return 15000;
 }
 
 function updateClock() {
@@ -691,7 +709,10 @@ document.addEventListener('keydown', (e) => {
         if (!isChatActive) {
             // Only allow opening chat if there's an active flash to record
             const hasActiveFlash = Object.values(expectedFlashes).some(flash => flash.active);
-            if (!hasActiveFlash) return;
+            if (!hasActiveFlash) {
+                showChatBlockedNotification();
+                return;
+            }
 
             isChatActive = true;
             chatHud.classList.add('active');
