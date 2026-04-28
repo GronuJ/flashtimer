@@ -130,6 +130,10 @@ function renderSessionChart() {
 }
 
 let isChatActive = false;
+let bubbleTimeout = null;
+let bubblesBanked = 0;
+const BUBBLE_BANK_MAX = 3;
+const BUBBLE_BANK_PER_STACK = 0.2;
 let gameTimeSeconds = 0;
 let clockInterval = null;
 let scenarioTimeout = null;
@@ -250,13 +254,15 @@ const resCaught = document.getElementById('resCaught');
 const resNewBest = document.getElementById('resNewBest');
 const resultsContinueBtn = document.getElementById('resultsContinueBtn');
 
-function nextCatchPoints() { return 100 + streak * 20; }
+function bubbleBankMult() { return 1 + bubblesBanked * BUBBLE_BANK_PER_STACK; }
+function nextCatchPoints() { return Math.round((100 + streak * 20) * bubbleBankMult()); }
 
 function updateScoreUI(prevStreak = streak) {
     scoreVal.textContent = score;
     streakVal.textContent = streak;
-    const mult = 1 + streak * 0.2;
-    scoreNextEl.textContent = `+${nextCatchPoints()} ×${mult.toFixed(1)}`;
+    const totalMult = (1 + streak * 0.2) * bubbleBankMult();
+    const bankIndicator = bubblesBanked > 0 ? ` 🫧×${bubblesBanked}` : '';
+    scoreNextEl.textContent = `+${nextCatchPoints()} ×${totalMult.toFixed(1)}${bankIndicator}`;
 
     if (score > sessionBest) sessionBest = score;
     scoreBestEl.textContent = sessionBest;
@@ -429,6 +435,8 @@ function endSession(userAborted) {
     if (clockInterval) clearInterval(clockInterval);
     if (scenarioTimeout) clearTimeout(scenarioTimeout);
     if (distractionInterval) clearTimeout(distractionInterval);
+    if (bubbleTimeout) clearTimeout(bubbleTimeout);
+    clearBubbles();
 
     scoreBoard.style.display = 'none';
     accuracyBoard.style.display = 'none';
@@ -474,6 +482,57 @@ function endSession(userAborted) {
         userAborted ? 'Session Ended' : 'Session Complete';
     resultsModal.style.display = 'block';
 }
+// --- Bubble minigame: pops while no flash is active, banks a multiplier
+// stack consumed by the next catch. Pauses (and clears) the moment a flash
+// spawns so the user's attention snaps back to the timer task.
+function anyFlashActive() {
+    return Object.values(expectedFlashes).some(f => f.active);
+}
+function clearBubbles() {
+    document.querySelectorAll('.bubble').forEach(b => b.remove());
+}
+function scheduleNextBubble() {
+    if (bubbleTimeout) clearTimeout(bubbleTimeout);
+    const delay = 2000 + Math.random() * 4000;
+    bubbleTimeout = setTimeout(spawnBubble, delay);
+}
+function spawnBubble() {
+    if (!isPracticing) return;
+    if (anyFlashActive()) { scheduleNextBubble(); return; }
+
+    const size = 36;
+    const topMin = 110;
+    const bottomReserve = 220;
+    const sideMargin = 60;
+    const top = topMin + Math.random() * Math.max(60, window.innerHeight - topMin - bottomReserve);
+    const left = sideMargin + Math.random() * Math.max(60, window.innerWidth - sideMargin * 2 - size);
+
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.style.top = `${top}px`;
+    b.style.left = `${left}px`;
+    document.body.appendChild(b);
+
+    const lifeMs = 2600;
+    const expireTimer = setTimeout(() => {
+        b.classList.add('expired');
+        setTimeout(() => b.remove(), 280);
+    }, lifeMs);
+
+    b.addEventListener('click', () => {
+        clearTimeout(expireTimer);
+        if (bubblesBanked < BUBBLE_BANK_MAX) bubblesBanked++;
+        score += 25;
+        playTone(1100, 70, 'sine', 0.05);
+        b.classList.add('pop');
+        showFloatingText(`🫧 +25 · BANK ×${bubbleBankMult().toFixed(1)}`, '#c8aa6e');
+        updateScoreUI();
+        setTimeout(() => b.remove(), 240);
+    });
+
+    scheduleNextBubble();
+}
+
 // Generate a random flash event
 function triggerRandomFlash(manualRole = null) {
     if (!isPracticing) return;
@@ -525,6 +584,7 @@ function triggerRandomFlash(manualRole = null) {
     
     showNotification(`${randomRole} Flashed!`, randomRole, formatTime(timeFlashedSeconds));
     soundFlashSpawn();
+    clearBubbles();
 
     // Teamfight Mode: 25% chance to trigger another simultaneous flash
     if (!manualRole && teamfightModeCheckbox.checked && Math.random() < 0.25) {
@@ -670,6 +730,7 @@ function startPractice() {
     
     score = 0;
     streak = 0;
+    bubblesBanked = 0;
     sessionBest = 0;
     sessionCatches = 0;
     sessionMisses = 0;
@@ -703,6 +764,8 @@ function startPractice() {
     
     // Start fake chat
     distractionInterval = setTimeout(triggerFakeChat, Math.floor(Math.random() * 4000) + 2000);
+
+    scheduleNextBubble();
     
     document.body.focus();
 }
@@ -767,7 +830,8 @@ function evaluateTimers(msgText) {
                 hitCount++;
                 expectedFlashes[typedRole].active = false; // Mark resolved
                 
-                const pointsGained = 100 + (streak * 20);
+                const pointsGained = Math.round((100 + streak * 20) * bubbleBankMult());
+                if (bubblesBanked > 0) bubblesBanked--;
                 score += pointsGained;
                 streak++;
                 sessionCatches++;
