@@ -556,14 +556,15 @@ function triggerFakeChat() {
         "push", "freeze", "slow push", "proxy",
         "focus adc", "focus the carry", "peel me", "engage",
         "sleeper op", "free lp", "ez clap", "insane outplay",
-        // Old TSM / S2-S3 nostalgia
-        "chaox carrying again", "xspecial peel diff", "old tsm > new tsm",
-        "reginald flame chat", "dyrus top diff", "oddone smite check",
-        "saintvicious missed smite LMAO", "sv smite diff",
-        "hotshotgg: he's too tanky", "hsgg pls press R",
-        "chaox lifesteal stack op", "xspecial wards on point",
-        "rumble ult missed", "double lift not in tsm yet",
-        "scarra mid", "voyboy shen split", "wcg flashback"
+        // Old TSM / S2-S3 nostalgia, written like a tilted teammate
+        "he's too tanky", "bro he's too tanky",
+        "smite diff", "no smite again??", "smite check pls",
+        "jg is saintvicious 2.0", "sv would've smited that",
+        "xspecial would peel for me", "sup diff xspecial main btw",
+        "chaox carry pls", "where's my chaox",
+        "old tsm wouldn't lose this", "reginald would bench u",
+        "dyrus farming wr", "oddone where",
+        "wildturtle 4 fun", "bring back s2"
     ];
 
     const fakeNames = [
