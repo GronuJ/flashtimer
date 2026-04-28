@@ -586,8 +586,8 @@ function triggerFakeChat() {
     chatHistory.appendChild(msgDiv);
     chatHistory.scrollTop = chatHistory.scrollHeight;
     
-    // Reschedule fake chat randomly between 15s and 40s
-    const nextChatDelay = Math.floor(Math.random() * 25000) + 15000;
+    // Reschedule fake chat randomly between 4s and 14s
+    const nextChatDelay = Math.floor(Math.random() * 10000) + 4000;
     distractionInterval = setTimeout(triggerFakeChat, nextChatDelay);
 }
 
@@ -636,7 +636,7 @@ function startPractice() {
     scenarioTimeout = setTimeout(() => triggerRandomFlash(), 3000);
     
     // Start fake chat
-    distractionInterval = setTimeout(triggerFakeChat, Math.floor(Math.random() * 10000) + 5000);
+    distractionInterval = setTimeout(triggerFakeChat, Math.floor(Math.random() * 4000) + 2000);
     
     document.body.focus();
 }
