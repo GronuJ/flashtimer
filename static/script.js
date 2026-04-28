@@ -132,7 +132,7 @@ function renderSessionChart() {
 let isChatActive = false;
 let bubbleTimeout = null;
 let bubblesBanked = 0;
-const BUBBLE_BANK_MAX = 3;
+const BUBBLE_BANK_MAX = 20;
 const BUBBLE_BANK_PER_STACK = 0.2;
 let gameTimeSeconds = 0;
 let clockInterval = null;
@@ -403,7 +403,9 @@ function updateClock() {
             f.active = false;
             sessionMisses++;
             const prevStreak = streak;
-            streak = 0;
+            streak = Math.max(0, streak - 1);
+            score = Math.max(0, score - 50);
+            if (bubblesBanked > 0) bubblesBanked--;
             showMissNotification(role, formatTime(f.time));
             soundMiss();
             updateScoreUI(prevStreak);
@@ -834,7 +836,6 @@ function evaluateTimers(msgText) {
                 expectedFlashes[typedRole].active = false; // Mark resolved
                 
                 const pointsGained = Math.round((100 + streak * 20) * bubbleBankMult());
-                if (bubblesBanked > 0) bubblesBanked--;
                 score += pointsGained;
                 streak++;
                 sessionCatches++;
