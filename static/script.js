@@ -493,7 +493,7 @@ function clearBubbles() {
 }
 function scheduleNextBubble() {
     if (bubbleTimeout) clearTimeout(bubbleTimeout);
-    const delay = 2000 + Math.random() * 4000;
+    const delay = 800 + Math.random() * 1800;
     bubbleTimeout = setTimeout(spawnBubble, delay);
 }
 function spawnBubble() {
@@ -513,7 +513,7 @@ function spawnBubble() {
     b.style.left = `${left}px`;
     document.body.appendChild(b);
 
-    const lifeMs = 2600;
+    const lifeMs = 1200;
     const expireTimer = setTimeout(() => {
         b.classList.add('expired');
         setTimeout(() => b.remove(), 280);
