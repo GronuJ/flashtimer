@@ -318,9 +318,14 @@ function renderFlashTracker() {
 
 // Update clock
 function getCatchWindowMs() {
-    // Fixed real-time window so the typing budget doesn't shrink at high
-    // clock speeds (at 10x the old in-game-scaled window collapsed to 3s).
-    return 15000;
+    // Window is tied to flash frequency, not clock speed: harder pacing =
+    // tighter typing budget, while remaining stable across clock speeds.
+    switch (flashFreqSelect.value) {
+        case 'insane': return 5000;
+        case 'high':   return 10000;
+        case 'low':    return 20000;
+        default:       return 15000; // medium
+    }
 }
 
 // Past ~45:00, a flash logged with +5min wraps past the 4-digit mmss format
