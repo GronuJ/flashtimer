@@ -528,6 +528,9 @@ function spawnBubble() {
         showFloatingText(`🫧 +25 · BANK ×${bubbleBankMult().toFixed(1)}`, '#c8aa6e');
         updateScoreUI();
         setTimeout(() => b.remove(), 240);
+        // Reward fast aim with an immediate next bubble (cancel pending timer).
+        if (bubbleTimeout) clearTimeout(bubbleTimeout);
+        bubbleTimeout = setTimeout(spawnBubble, 80);
     });
 
     scheduleNextBubble();
