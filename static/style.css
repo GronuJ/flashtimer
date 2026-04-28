@@ -818,3 +818,14 @@ body, html {
     font-family: Arial, sans-serif;
     caret-color: #ffffff;
 }
+
+.made-for {
+    margin-top: 18px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6a6a6a;
+    text-align: center;
+    font-style: italic;
+}
+.made-for::before, .made-for::after { content: ""; }
