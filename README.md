@@ -8,14 +8,14 @@ A browser-based trainer for tracking enemy Flash (and any 5-minute cooldown) in 
 
 1. Start a session — pick clock speed, flash frequency, length (3 / 5 / 10 min or unlimited), and optional modes.
 2. Enemy flashes pop up as chat messages (e.g. `14:20 Jgl (Jgl): Mid used Flash`).
-3. Press `Enter`, type the return time as `role + MMSS` (flash time + 5:00), press `Enter` again. Example: a Mid Flash at `14:20` → type `mid1920`.
+3. Press `Enter`, type the return time as `role + MMSS` (flash time + 5:00), press `Enter` again. Example: a Mid Flash at `14:20` → type `mid1920`. ADC accepts both `adc` and `ad`. You have 15 real-time seconds to log a flash before it's counted as a miss.
 4. Catch it in time to score; build a streak for multipliers and climb the rank badge (Iron → Challenger).
 5. Session ends with a results screen; your score per session is charted in Stats.
 
 ## Modes
 
-- **Clock speed** (1x / 2x / 5x / 10x) — how fast the game clock advances. Catch window scales with it (30 in-game seconds, floored at 3 real).
-- **Flash frequency** (high / medium / low) — how often events spawn.
+- **Clock speed** (1x / 2x / 5x / 10x) — how fast the game clock advances. The catch window is a fixed 15 real-time seconds, independent of speed. Past 45:00 the clock soft-resets to a fresh early-game window once outstanding flashes are resolved (since flash + 5:00 wraps past the 4-digit input format).
+- **Flash frequency** (insane / high / medium / low) — how often events spawn.
 - **Hidden timers (hardcore)** — chat hides the exact time the Flash went out; you calculate it.
 - **Simultaneous spells (teamfights)** — occasional double flashes.
 - **Fake chat distractions** — teammate spam to filter out while you track.
