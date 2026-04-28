@@ -323,8 +323,26 @@ function getCatchWindowMs() {
     return 15000;
 }
 
+// Past ~45:00, a flash logged with +5min wraps past the 4-digit mmss format
+// (e.g. 46:00 → expected 51:00). Soft-reset the in-game clock to a fresh
+// early-game window once outstanding flashes are resolved.
+const GAME_TIME_RESET_AT = 45 * 60;
+function maybeResetGameClock() {
+    if (gameTimeSeconds < GAME_TIME_RESET_AT) return;
+    const anyActive = Object.values(expectedFlashes).some(f => f.active);
+    if (anyActive) return;
+    expectedFlashes = {};
+    gameTimeSeconds = Math.floor(Math.random() * 360) + 120;
+    chatHistory.innerHTML = '';
+    const sysMsg = document.createElement('div');
+    sysMsg.className = 'chat-message';
+    sysMsg.innerHTML = `<span style="color:#c8aa6e;">— New game started —</span>`;
+    chatHistory.appendChild(sysMsg);
+}
+
 function updateClock() {
     gameTimeSeconds += 1;
+    maybeResetGameClock();
     gameClockEl.textContent = formatTime(gameTimeSeconds);
 
     const windowMs = getCatchWindowMs();
@@ -475,7 +493,8 @@ function scheduleNextFlash() {
     
     const freqSetting = flashFreqSelect.value;
     let minDel = 20000, maxDel = 40000;
-    if (freqSetting === 'high') { minDel = 8000; maxDel = 20000; }
+    if (freqSetting === 'insane') { minDel = 3000; maxDel = 8000; }
+    else if (freqSetting === 'high') { minDel = 8000; maxDel = 20000; }
     else if (freqSetting === 'low') { minDel = 40000; maxDel = 70000; }
     
     const nextEventDelay = Math.floor(Math.random() * (maxDel - minDel)) + minDel;
@@ -656,12 +675,14 @@ window.addEventListener('click', (e) => {
 function evaluateTimers(msgText) {
     const msg = msgText.toLowerCase();
     // Match e.g. "top 1420", "mid 1930", "sup 920", "adc 8:30"
-    const regex = /(top|jgl|mid|adc|sup)\s*(\d{1,2})[:]?(\d{2})/g;
+    // 'adc' before 'ad' so the longer alias wins; both map to the 'adc' key.
+    const regex = /(top|jgl|adc|ad|mid|sup)\s*(\d{1,2})[:]?(\d{2})/g;
+    const roleAlias = { ad: 'adc' };
     let match;
     let hitCount = 0;
 
     while ((match = regex.exec(msg)) !== null) {
-        const typedRole = match[1];
+        const typedRole = roleAlias[match[1]] || match[1];
         const m = parseInt(match[2], 10);
         const s = parseInt(match[3], 10);
         const typedSeconds = m * 60 + s;
