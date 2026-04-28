@@ -438,18 +438,34 @@ function endSession(userAborted) {
 function triggerRandomFlash(manualRole = null) {
     if (!isPracticing) return;
 
-    // Filter out roles that are currently on cooldown (5 minutes hasn't passed)
+    // A role is available once either the 5-minute in-game Flash cooldown
+    // has elapsed OR 60s of real time has passed since the spawn. The real-time
+    // cap keeps slow clock speeds (1x/2x) from starving the spawn pool.
+    const REAL_COOLDOWN_MS = 60000;
+    const speed = parseFloat(clockSpeedSelect.value) || 1;
+    const now = Date.now();
     const availableRoles = roles.filter(r => {
-        const roleLower = r.toLowerCase();
-        if (!expectedFlashes[roleLower]) return true;
-        // It's on cooldown if the current in-game time is less than the expected flash time
-        return gameTimeSeconds >= expectedFlashes[roleLower].time;
+        const f = expectedFlashes[r.toLowerCase()];
+        if (!f) return true;
+        const ingameReady = gameTimeSeconds >= f.time;
+        const realReady = now - f.realTimeSpawn >= REAL_COOLDOWN_MS;
+        return ingameReady || realReady;
     });
-    
-    // If all roles are on cooldown, just reschedule
+
+    // If all roles are on cooldown, wait until the soonest one frees up
+    // instead of rolling a fresh random delay on top of the gated state.
     if (availableRoles.length === 0) {
         if (!manualRole) {
-            scheduleNextFlash();
+            let earliestMs = Infinity;
+            for (const r of roles) {
+                const f = expectedFlashes[r.toLowerCase()];
+                if (!f) continue;
+                const ingameMs = Math.max(0, ((f.time - gameTimeSeconds) * 1000) / speed);
+                const realMs = Math.max(0, REAL_COOLDOWN_MS - (now - f.realTimeSpawn));
+                earliestMs = Math.min(earliestMs, Math.min(ingameMs, realMs));
+            }
+            if (scenarioTimeout) clearTimeout(scenarioTimeout);
+            scenarioTimeout = setTimeout(() => triggerRandomFlash(), Math.max(200, earliestMs + 50));
         }
         return;
     }
