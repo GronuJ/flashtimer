@@ -525,9 +525,9 @@ function spawnBubble() {
         clearTimeout(expireTimer);
         if (bubblesBanked < BUBBLE_BANK_MAX) bubblesBanked++;
         score += 25;
-        // Pitch climbs with the bank — capped so very high stacks stay audible.
-        const pitch = Math.min(2400, 700 + bubblesBanked * 60);
-        playTone(pitch, 70, 'sine', 0.05);
+        // Pitch climbs slowly with the bank so you can hear streak depth grow.
+        const pitch = Math.min(2200, 600 + bubblesBanked * 25);
+        playTone(pitch, 220, 'sine', 0.05);
         b.classList.add('pop');
         showFloatingText(`🫧 +25 · BANK ×${bubbleBankMult().toFixed(1)}`, '#c8aa6e');
         updateScoreUI();
