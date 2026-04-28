@@ -31,6 +31,44 @@ const flashFreqSelect = document.getElementById('flashFreq');
 const hardcoreModeCheckbox = document.getElementById('hardcoreMode');
 const teamfightModeCheckbox = document.getElementById('teamfightMode');
 const distractionModeCheckbox = document.getElementById('distractionMode');
+const soundModeCheckbox = document.getElementById('soundMode');
+
+// WebAudio: lazy-init on first user gesture (browsers block autoplay).
+let audioCtx = null;
+function ensureAudio() {
+    if (!soundModeCheckbox.checked) return null;
+    if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+    }
+    return audioCtx;
+}
+function playTone(freq, durationMs, type = 'sine', gain = 0.06) {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    g.gain.value = 0;
+    osc.connect(g).connect(ctx.destination);
+    const now = ctx.currentTime;
+    g.gain.linearRampToValueAtTime(gain, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
+    osc.start(now);
+    osc.stop(now + durationMs / 1000 + 0.02);
+}
+function soundFlashSpawn() { playTone(660, 90, 'triangle', 0.05); }
+function soundCatch(streakLevel) {
+    // Pitch climbs slightly with streak, capped.
+    const base = 880 + Math.min(streakLevel, 10) * 40;
+    playTone(base, 110, 'sine', 0.07);
+    setTimeout(() => playTone(base * 1.5, 90, 'sine', 0.05), 60);
+}
+function soundMiss() {
+    playTone(220, 180, 'sawtooth', 0.05);
+    setTimeout(() => playTone(160, 220, 'sawtooth', 0.04), 90);
+}
 
 // Local Storage Stats
 let stats = JSON.parse(localStorage.getItem('flashTimerStats')) || {
@@ -217,7 +255,8 @@ function nextCatchPoints() { return 100 + streak * 20; }
 function updateScoreUI(prevStreak = streak) {
     scoreVal.textContent = score;
     streakVal.textContent = streak;
-    scoreNextEl.textContent = `+${nextCatchPoints()}`;
+    const mult = 1 + streak * 0.2;
+    scoreNextEl.textContent = `+${nextCatchPoints()} ×${mult.toFixed(1)}`;
 
     if (score > sessionBest) sessionBest = score;
     scoreBestEl.textContent = sessionBest;
@@ -360,6 +399,7 @@ function updateClock() {
             const prevStreak = streak;
             streak = 0;
             showMissNotification(role, formatTime(f.time));
+            soundMiss();
             updateScoreUI(prevStreak);
         }
     }
@@ -484,6 +524,7 @@ function triggerRandomFlash(manualRole = null) {
     };
     
     showNotification(`${randomRole} Flashed!`, randomRole, formatTime(timeFlashedSeconds));
+    soundFlashSpawn();
 
     // Teamfight Mode: 25% chance to trigger another simultaneous flash
     if (!manualRole && teamfightModeCheckbox.checked && Math.random() < 0.25) {
@@ -706,8 +747,9 @@ function evaluateTimers(msgText) {
     const msg = msgText.toLowerCase();
     // Match e.g. "top 1420", "mid 1930", "sup 920", "adc 8:30"
     // 'adc' before 'ad' so the longer alias wins; both map to the 'adc' key.
-    const regex = /(top|jgl|adc|ad|mid|sup)\s*(\d{1,2})[:]?(\d{2})/g;
-    const roleAlias = { ad: 'adc' };
+    // Longer aliases first so e.g. 'adc' doesn't get partially matched as 'ad'.
+    const regex = /(top|jgl|jg|adc|ad|mid|sup)\s*(\d{1,2})[:]?(\d{2})/g;
+    const roleAlias = { ad: 'adc', jg: 'jgl' };
     let match;
     let hitCount = 0;
 
@@ -739,6 +781,7 @@ function evaluateTimers(msgText) {
                 saveStats();
                 
                 showFloatingText(`${typedRole.toUpperCase()} · ${getCatchCallout(streak)} · +${pointsGained}`, '#55ff88');
+                soundCatch(streak);
             }
         }
     }
