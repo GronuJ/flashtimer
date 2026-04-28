@@ -555,7 +555,15 @@ function triggerFakeChat() {
         "wards plz", "vision???", "ward the bush", "check river",
         "push", "freeze", "slow push", "proxy",
         "focus adc", "focus the carry", "peel me", "engage",
-        "sleeper op", "free lp", "ez clap", "insane outplay"
+        "sleeper op", "free lp", "ez clap", "insane outplay",
+        // Old TSM / S2-S3 nostalgia
+        "chaox carrying again", "xspecial peel diff", "old tsm > new tsm",
+        "reginald flame chat", "dyrus top diff", "oddone smite check",
+        "saintvicious missed smite LMAO", "sv smite diff",
+        "hotshotgg: he's too tanky", "hsgg pls press R",
+        "chaox lifesteal stack op", "xspecial wards on point",
+        "rumble ult missed", "double lift not in tsm yet",
+        "scarra mid", "voyboy shen split", "wcg flashback"
     ];
 
     const fakeNames = [
